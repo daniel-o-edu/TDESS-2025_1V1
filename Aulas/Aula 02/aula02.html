@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 02 - O Papel do QA no Mercado</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f7fa;
+    --accent: #1a56db;
+    --accent2: #0e7a5c;
+    --accent3: #c0392b;
+    --text: #111827;
+    --muted: #4b5563;
+    --border: #d1d5db;
+    --code-bg: #f0f2f5;
+    --highlight: #e8f0fe;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(30px, 5vw, 80px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    background: var(--bg);
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  .content-box {
+    max-width: 900px;
+    width: 100%;
+    padding: clamp(20px, 3vw, 40px);
+  }
+
+  .slide-label {
+    font-size: clamp(13px, 2vw, 17px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .slide-title {
+    font-size: clamp(24px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    color: var(--text);
+    text-align: center;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 16px;
+  }
+  .slide-title em { color: var(--accent); font-style: normal; }
+
+  .slide-hero {
+    background: #f0f4f8;
+    border-left: 8px solid var(--accent);
+    justify-content: center;
+  }
+  .hero-kicker {
+    font-size: clamp(14px, 2.5vw, 19px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .hero-title {
+    font-size: clamp(32px, 7vw, 68px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .hero-title span { color: var(--accent); }
+  .hero-subtitle {
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .slide-section {
+    background: #e8eef5;
+    justify-content: center;
+  }
+  .section-number {
+    font-size: clamp(80px, 18vw, 180px);
+    font-weight: 700;
+    color: rgba(26,86,219,0.1);
+    line-height: 1;
+    margin-bottom: -10px;
+    text-align: center;
+  }
+  .section-part {
+    font-size: clamp(14px, 2.5vw, 18px);
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .section-heading {
+    font-size: clamp(28px, 6vw, 60px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+    text-align: center;
+  }
+  .section-heading span { color: var(--accent); }
+
+  .prose {
+    font-size: clamp(16px, 2.2vw, 20px);
+    line-height: 1.7;
+    color: var(--muted);
+    margin: 16px 0;
+  }
+  .prose strong { color: var(--text); font-weight: 700; }
+  .prose em { color: var(--accent); font-weight: 700; font-style: normal; }
+
+  .analogy-box {
+    border-left: 4px solid var(--accent);
+    background: var(--highlight);
+    border-radius: 0 8px 8px 0;
+    padding: clamp(16px, 2.5vw, 24px);
+    margin: 20px 0;
+    font-size: clamp(16px, 2.2vw, 19px);
+    line-height: 1.7;
+  }
+  .analogy-box strong { color: var(--accent); }
+
+  .bullet-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: clamp(16px, 2.2vw, 19px);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .bullet-list li::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 16px;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(18px, 2.5vw, 28px);
+    margin: 16px 0;
+  }
+  .card-title {
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .card-title.yellow { color: #b45309; }
+  .card-title.green  { color: var(--accent2); }
+  .card-title.red    { color: var(--accent3); }
+  .card-title.blue   { color: var(--accent); }
+
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(15px, 2vw, 19px);
+    margin: 20px 0;
+  }
+  .styled-table thead tr { background: var(--accent); }
+  .styled-table th {
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: clamp(14px, 2vw, 18px);
+  }
+  .styled-table td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+  }
+  .styled-table tr:nth-child(even) td { background: var(--surface); }
+
+  #progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  #nav {
+    position: fixed;
+    bottom: 20px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+  }
+  #slide-counter {
+    font-size: clamp(14px, 1.8vw, 17px);
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .nav-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .nav-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  @media (max-width: 600px) {
+    .slide { padding: 20px; }
+    .content-box { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <div class="slide slide-hero active">
+    <div class="content-box">
+      <div class="hero-kicker">Aula 02</div>
+      <h1 class="hero-title">O Papel do QA <span>no Mercado</span></h1>
+      <p class="hero-subtitle">"Da Execução de Testes à Engenharia da Qualidade"</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Introdução</div>
+      <h2 class="slide-title">Contextualização <em>Estratégica</em></h2>
+      <p class="prose">No mercado atual de Desenvolvimento de Sistemas, o ciclo de vida do software exige entregas contínuas, rápidas e, acima de tudo, confiáveis.</p>
+      <p class="prose">Dentro do cenário da nossa Situação de Aprendizagem (SA), na qual vocês atuam como uma equipe de uma empresa júnior de tecnologia desenvolvendo uma solução inovadora para uma feira de investidores, não basta que o código compile.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Introdução</div>
+      <h2 class="slide-title">Mentalidade de <em>Qualidade</em></h2>
+      <p class="prose">Um produto digital com falhas em sua apresentação pode significar a perda de milhares de reais em aportes financeiros.</p>
+      <p class="prose">É neste ponto crítico que a mentalidade de Qualidade (Quality Assurance) deve ser inserida desde o dia zero, não como um gargalo no final do processo, mas como um pilar contínuo de excelência e confiabilidade técnica.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Introdução</div>
+      <h2 class="slide-title">Resumo do que será <em>desenvolvido</em></h2>
+      <p class="prose">Esta aula promoverá uma imersão profunda na diferenciação dos papéis voltados à qualidade de software.</p>
+      <p class="prose">Vamos desconstruir o mito do testador como um mero "caçador de bugs" de final de ciclo e construir a visão do QA como um estrategista e do Engenheiro da Qualidade como um arquiteto de automação e processos.</p>
+      <p class="prose">Abordaremos as habilidades técnicas (Hard Skills) e comportamentais (Soft Skills) indispensáveis para a atuação eficiente dentro de uma equipe multidisciplinar (Scrum/Kanban), preparando vocês para estruturarem a esteira de qualidade do projeto da empresa júnior.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">01</span>
+      <div class="section-part">Parte 1</div>
+      <h2 class="section-heading">Fundamentação e <span>Contextualização</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Fundamentação</div>
+      <h2 class="slide-title">Problema Real de TI <em>(Narrativa do Mercado)</em></h2>
+      <p class="prose">Imagine o seguinte cenário em uma startup de logística: A equipe passou as últimas três Sprints desenvolvendo uma nova funcionalidade de roteirização de entregas em tempo real.</p>
+      <p class="prose">O Backlog estava cheio, os desenvolvedores focaram 100% em codificar, e a mentalidade era "terminar a feature o mais rápido possível".</p>
+      <p class="prose">Faltando apenas dois dias para o Deploy em produção, o sistema foi entregue a um único testador manual para "dar uma olhada".</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Fundamentação</div>
+      <h2 class="slide-title">O Surgimento da <em>Falha</em></h2>
+      <p class="prose">Durante a execução, o testador descobriu que a integração com a API do Google Maps estava gerando um erro fatal (HTTP 500) quando dois veículos tentavam acessar rotas simultâneas.</p>
+      <p class="prose">O resultado? O Deploy foi cancelado, a equipe precisou fazer horas extras exaustivas para investigar o Bug na arquitetura, e o custo de correção foi cem vezes maior do que se o problema tivesse sido identificado na fase de requisitos.</p>
+      <p class="prose">O código havia virado um emaranhado que precisaria de pesada Refatoração.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Fundamentação</div>
+      <h2 class="slide-title">O Sintoma de uma Empresa <em>Reativa</em></h2>
+      <p class="prose">Este é o sintoma clássico de uma empresa que vê o teste como uma fase isolada, e não como um processo contínuo de garantia de qualidade.</p>
+      <p class="prose">A ausência de um profissional de QA atuando desde o refinamento dos requisitos permitiu que uma falha arquitetônica grave avançasse por todo o ciclo de desenvolvimento.</p>
+      <p class="prose">O testador, alocado apenas no final, encontrou o erro, mas o impacto no cronograma e no orçamento já era irreversível.</p>
+      <p class="prose">A falha não foi do testador, mas do processo de engenharia de software da empresa que adotou uma postura reativa.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Conceituação</div>
+      <h2 class="slide-title">Conceituação <em>Técnica</em></h2>
+      <p class="prose">O que significa, formalmente, Garantir a Qualidade (Quality Assurance) em sistemas de informação?</p>
+      <p class="prose">Segundo a literatura clássica de Teste de Software (como Delamaro, Maldonado e Jino), o teste é o processo de executar um programa com o intuito de encontrar erros.</p>
+      <p class="prose">Contudo, Quality Assurance (QA) abrange um conjunto de atividades estruturadas para garantir que os processos utilizados na criação do software sejam adequados e cumpram os padrões estabelecidos, prevenindo que o defeito sequer seja introduzido no código.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Comparação</div>
+      <h2 class="slide-title">Teste vs <em>QA</em></h2>
+      <div style="display: flex; gap: 20px;">
+        <div class="card" style="flex: 1;">
+          <div class="card-title red">Teste (Controle de Qualidade - QC)</div>
+          <p class="prose">Orientado ao produto final (verificação do código compilado ou interface finalizada).</p>
+        </div>
+        <div class="card" style="flex: 1;">
+          <div class="card-title blue">Quality Assurance (QA)</div>
+          <p class="prose">Orientado ao processo.</p>
+          <p class="prose" style="font-size: clamp(14px, 1.8vw, 17px);">O QA avalia se as histórias de usuário (User Stories) possuem critérios de aceite claros, se os desenvolvedores estão aplicando TDD (Test-Driven Development), se as revisões de código (Code Reviews) estão sendo eficientes e se a arquitetura suporta testes automatizados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Conceituação</div>
+      <h2 class="slide-title">A <em>Estrada Segura</em></h2>
+      <p class="prose">O QA constrói a "estrada" segura por onde o código vai trafegar até o ambiente de produção.</p>
+      <p class="prose">Portanto, o profissional como agente da qualidade transcende a execução de scripts de teste.</p>
+      <p class="prose">Ele promove a cultura do Shift-Left, um termo do mercado de Tl que significa "mover os testes para a esquerda" no cronograma (ou seja, para o início do projeto).</p>
+      <p class="prose">Ele questiona a lógica de negócios, avalia os protótipos de design e auxilia na construção de uma arquitetura que seja inerentemente testável, aplicando a máxima de que "a qualidade não pode ser testada em um produto, ela deve ser construída dentro dele".</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Analogias</div>
+      <h2 class="slide-title">Analogias com o <em>Mercado</em></h2>
+      <p class="prose">Pense na construção de um carro esportivo de alto desempenho.</p>
+      <p class="prose">O Testador tradicional atua como o piloto de testes que pega o carro pronto no final da linha de montagem e acelera na pista para ver se o motor explode ou se os freios falham.</p>
+      <p class="prose">Se o freio falhar a $200~km/h$, o custo (e o risco) é altíssimo, e o carro tem que voltar para a fábrica, ser desmontado e refeito.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Analogias</div>
+      <h2 class="slide-title">O QA na <em>Fábrica</em></h2>
+      <p class="prose">O QA, por sua vez, é o engenheiro de processos da fábrica.</p>
+      <p class="prose">Ele analisa a qualidade das pastilhas de freio antes mesmo delas serem instaladas.</p>
+      <p class="prose">Ele verifica se os robôs que soldam o chassi estão calibrados.</p>
+      <p class="prose">Ele estabelece as métricas de segurança ainda na prancheta de desenho.</p>
+      <p class="prose">Se o processo é garantido, a chance do carro falhar na pista reduz drasticamente.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Analogias</div>
+      <h2 class="slide-title">Em Desenvolvimento de <em>Sistemas</em></h2>
+      <p class="prose">Em Desenvolvimento de Sistemas, o "piloto de fuga" é aquele que testa a aplicação web na sexta-feira à noite antes do Deploy.</p>
+      <p class="prose">O QA é quem atuou nas reuniões de planejamento da Sprint, definiu os critérios com o Product Owner (PO) e configurou as ferramentas de análise estática de código para que os programadores seguissem as boas práticas de Clean Code durante toda a semana.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Prática</div>
+      <h2 class="slide-title">Demonstração Guiada e Conexão com <em>SA</em></h2>
+      <p class="prose">Vamos olhar para a nossa Situação de Aprendizagem (SA). Vocês estão desenvolvendo uma solução para investidores.</p>
+      <p class="prose">Se vocês adotarem a postura de "testadores", apenas um ou dois membros do grupo vão abrir o sistema web no dia anterior à feira, clicar em todos os botões e anotar num bloco de notas o que quebrou.</p>
+      <p class="prose">Essa abordagem é amadora e inaceitável no mercado.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Prática</div>
+      <h2 class="slide-title">Agentes de <em>Qualidade</em></h2>
+      <p class="prose">Se vocês assumirem o papel de Agentes de Qualidade (QAs), hoje mesmo vocês começarão a revisar o que foi documentado.</p>
+      <p class="prose">O botão de "Investir" tem regras claras?</p>
+      <ul class="bullet-list">
+        <li>O que acontece se o usuário digitar uma string em um campo que espera o valor em Double?</li>
+        <li>Como a nossa Stack tecnológica vai lidar com isso?</li>
+      </ul>
+      <p class="prose">O profissional de qualidade se antecipa.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 1 · Prática</div>
+      <h2 class="slide-title">Erro comum dos <em>estudantes</em></h2>
+      <p class="prose">Muitos alunos de tecnologia acreditam que apenas o desenvolvedor back-end ou front-end "trabalha" no começo do projeto, e quem escolheu a área de testes fica ocioso esperando o software ficar pronto.</p>
+      <p class="prose">Isso é um equívoco técnico crasso. O trabalho do QA começa na concepção da ideia, modelando cenários, criando mapas mentais de testes de fronteira e escrevendo a documentação preventiva.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">02</span>
+      <div class="section-part">Parte 2</div>
+      <h2 class="section-heading">Expansão Conceitual: <span>A Tríade dos Papéis</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Papéis</div>
+      <h2 class="slide-title">Diferenças <em>Fundamentais</em></h2>
+      <p class="prose">Vamos aprofundar as diferenças fundamentais que o mercado exige na contratação.</p>
+      <div class="card">
+        <div class="card-title yellow">O Testador de Software (Manual Tester)</div>
+        <p class="prose">É frequentemente o perfil de entrada. Sua função primária é validar o software contra os requisitos especificados através da interação direta com a interface do usuário (UI).</p>
+        <p class="prose">Ele recebe um Plano de Testes, segue os "Passos para Reproduzir" de um roteiro preestabelecido e verifica se o resultado atual bate com o resultado esperado.</p>
+        <p class="prose">Ele foca na perspectiva do usuário final, buscando falhas de usabilidade, links quebrados e erros lógicos visíveis.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Papéis</div>
+      <div class="card">
+        <div class="card-title blue">O Analista de QA (Quality Assurance)</div>
+        <p class="prose">Eleva o nível de atuação. Ele não apenas executa testes, mas desenha a estratégia de testes da Sprint.</p>
+        <p class="prose">O QA domina técnicas de caixa-branca e caixa-preta, particionamento de equivalência e análise de valor limite.</p>
+        <p class="prose">Mais importante, o QA analisa os requisitos, questiona ambiguidades no Backlog e trabalha lado a lado com os desenvolvedores.</p>
+        <p class="prose">Ele cria casos de teste complexos e, muitas vezes, inicia a transição para testes de APIs (usando ferramentas como Postman) e validação de banco de dados (usando SQL), garantindo que a comunicação entre o front-end e o back-end está íntegra.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Papéis</div>
+      <div class="card">
+        <div class="card-title green">O Engenheiro da Qualidade (Quality Engineer / QA Automation Engineer)</div>
+        <p class="prose">É um desenvolvedor com mentalidade destrutiva/construtiva. Ele domina linguagens de programação (como Java, Python, JavaScript) e frameworks (Selenium, Cypress, Playwright).</p>
+        <p class="prose">Sua responsabilidade é construir a infraestrutura que automatiza as validações criadas pelo QA.</p>
+        <p class="prose">Ele integra os scripts de automação nas esteiras de CI/CD (Integração e Entrega Contínuas) em ferramentas como Jenkins ou GitHub Actions.</p>
+        <p class="prose">Para o Engenheiro, o código de teste é tratado com o mesmo rigor, padrões de projeto (ex: Page Object Model) e versionamento (Git) que o código de produção da aplicação principal.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Comparações Técnicas</div>
+      <h2 class="slide-title">Cenário: <em>Tela de Login</em></h2>
+      <p class="prose">Para ilustrar a diferença técnica de atuação, vamos analisar o cenário de validação de uma tela de login:</p>
+      <ul class="bullet-list">
+        <li><strong>Testador:</strong> Abre o navegador, digita "admin", senha "123", clica no botão "Entrar" e verifica se acessou o dashboard. Em seguida, digita uma senha errada e verifica a mensagem de erro vermelha na tela. Tempo gasto: 3 minutos a cada vez que o sistema é alterado.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Comparações Técnicas</div>
+      <h2 class="slide-title">Cenário: <em>Tela de Login</em></h2>
+      <ul class="bullet-list">
+        <li><strong>QA:</strong> Além de fazer as validações básicas, ele desenha uma matriz rastreabilidade. Planeja testes com injeção de SQL nos campos de texto ('OR 1=1 --), testa acessibilidade (se a tela pode ser lida por leitores de tela para deficientes visuais), analisa o tempo limite da sessão e verifica via console do navegador se o token de autenticação está sendo passado corretamente no header da requisição HTTP sem expor dados sensíveis.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Comparações Técnicas</div>
+      <h2 class="slide-title">Cenário: <em>Tela de Login</em></h2>
+      <ul class="bullet-list">
+        <li><strong>Engenheiro da Qualidade:</strong> Escreve um script em Cypress que roda em modo headless (sem abrir a interface gráfica do navegador no computador do dev). Cada vez que qualquer programador faz um Push para o repositório, esse script roda automaticamente na nuvem em 5 segundos, cobrindo 50 combinações de login usando uma massa de dados em JSON. Se falhar, o sistema de versionamento bloqueia o Merge do código.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Análise de Cenários</div>
+      <h2 class="slide-title">Análise de Cenários Reais e <em>Erros Comuns</em></h2>
+      <p class="prose">No mercado de Tl, um dos maiores erros estratégicos é a crença de que "a automação resolve todos os problemas".</p>
+      <p class="prose">Muitas empresas iniciantes tentam pular o papel do QA analítico e contratar apenas Engenheiros de Automação para criar milhares de scripts automatizados da interface gráfica.</p>
+      <p class="prose">Isso gera o chamado "Teste Frágil" (Flaky Test). Como a interface muda constantemente (uma cor de botão, um ID de um formulário), o robô quebra todos os dias, e a equipe passa mais tempo dando manutenção no código de teste do que desenvolvendo features.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Análise de Cenários</div>
+      <h2 class="slide-title">Outro Erro <em>Clássico</em></h2>
+      <p class="prose">Outro erro clássico de equipes de desenvolvimento - e que ocorre muito nos projetos de TCC e SAs de cursos técnicos - é o desenvolvedor afirmar orgulhosamente: "Na minha máquina funciona".</p>
+      <p class="prose">O profissional de qualidade entra exatamente para quebrar esse paradigma.</p>
+      <p class="prose">O software não precisa funcionar no ambiente perfeito, isolado e cheio de dependências instaladas manualmente na máquina do desenvolvedor;</p>
+      <p class="prose">ele precisa funcionar no ambiente de homologação (Staging) e em Produção, sob estresse, com múltiplos usuários concorrentes.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 2 · Aplicação</div>
+      <h2 class="slide-title">Aplicação <em>Orientada</em></h2>
+      <p class="prose">Nesta etapa da nossa SA, vocês devem mapear os papéis dentro do grupo.</p>
+      <p class="prose">Quem tem mais afinidade com arquitetura de código, estude automação básica e TDD (conceitos do Kent Beck, fundamentais).</p>
+      <p class="prose">Quem tem um perfil mais analítico, crítico e voltado a produto, deve focar nas técnicas de modelagem de casos de teste, regras de negócio e mapeamento de riscos.</p>
+      <p class="prose">É mandatório que o grupo tenha, no mínimo, uma pessoa focada primariamente em ditar o ritmo de qualidade, cobrando critérios de aceite claros no Backlog da empresa júnior.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">03</span>
+      <div class="section-part">Parte 3</div>
+      <h2 class="section-heading">Resolução Guiada: <span>A Importância das Soft Skills</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 3 · Soft Skills</div>
+      <h2 class="slide-title">O Dia a Dia do Time <em>Ágil</em></h2>
+      <p class="prose">Entramos agora na dinâmica do dia a dia do time multidisciplinar ágil.</p>
+      <p class="prose">Uma das características que define um QA de excelência não está em quantas linguagens de programação ele domina, mas nas suas Soft Skills (habilidades comportamentais).</p>
+      <p class="prose">O QA tem uma das posições mais delicadas no ecossistema de software: o trabalho dele envolve encontrar falhas no trabalho de outras pessoas.</p>
+      <p class="prose">Se isso não for feito com empatia, inteligência emocional e excelente comunicação, o ambiente de trabalho torna-se tóxico e improdutivo.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 3 · Soft Skills</div>
+      <h2 class="slide-title">Comunicação Clara e <em>Assertiva</em></h2>
+      <p class="prose">A primeira Soft Skill essencial é a Comunicação Clara e Assertiva.</p>
+      <p class="prose">Quando um QA relata um Bug, ele não pode dizer "A tela de cadastro está quebrada, o Dev fez besteira".</p>
+      <p class="prose">Isso gera atrito defensivo. O relato profissional deve ser totalmente baseado em evidências, neutro e descritivo: "No ambiente de homologação (v1.4), ao tentar cadastrar um usuário com e-mail contendo caracteres especiais, o sistema retorna erro 500 no console em vez de exibir a mensagem de validação amigável estipulada no requisito X. Anexo log e print da tela."</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 3 · Soft Skills</div>
+      <h2 class="slide-title">Pensamento Crítico e Visão <em>Sistêmica</em></h2>
+      <p class="prose">A segunda é o Pensamento Crítico e Visão Sistêmica. O QA não olha para o código de forma isolada.</p>
+      <p class="prose">Ele precisa entender como uma alteração na tabela do banco de dados feita pelo DBA vai impactar a velocidade de renderização da tela do Front-End.</p>
+      <p class="prose">O QA deve ter a capacidade de pensar fora da caixa, antecipando cenários de uso que nem o usuário final pensou.</p>
+      <p class="prose">E se o usuário clicar duas vezes no botão de pagamento em menos de um segundo? A transação será cobrada em dobro? O pensamento crítico evita prejuízos financeiros massivos.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">04</span>
+      <div class="section-part">Parte 4</div>
+      <h2 class="section-heading">Simulação de Ambiente de Trabalho <span>(Roleplay Técnico)</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 4 · Simulação</div>
+      <h2 class="slide-title">Cenário de <em>Daily Scrum</em></h2>
+      <p class="prose">Vamos simular uma situação típica de Daily Scrum (reunião diária).</p>
+      <p class="prose">Cenário: O Desenvolvedor Sênior finalizou a feature de carrinho de compras e moveu o card para "Pronto para Teste".</p>
+      <p class="prose">O QA inicia as validações e descobre que o cálculo de frete está ignorando centavos.</p>
+      <p class="prose">O Dev diz que a Sprint acaba amanhã e que isso é um detalhe menor, que o QA está sendo "muito exigente" e atrasando o projeto.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 4 · Simulação</div>
+      <h2 class="slide-title">Tomada de Decisão <em>Técnica</em></h2>
+      <p class="prose">Como o QA age? Ele não deve entrar em confronto pessoal.</p>
+      <p class="prose">Ele deve utilizar a matriz de severidade e prioridade. O erro envolve cálculo financeiro? Sim.</p>
+      <p class="prose">Pode gerar prejuízo na escala de milhares de vendas? Sim. Então a severidade é Crítica.</p>
+      <p class="prose">O QA leva o impacto do defeito para PO (Product Owner), que é o dono do negócio.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 4 · Simulação</div>
+      <h2 class="slide-title">Negociação e <em>Argumentação</em></h2>
+      <p class="prose">Em conjunto com a equipe, utiliza-se a negociação (soft skill) e argumentação baseada em dados: "Se não corrigirmos esse arredondamento na função de cálculo de frete, o e-commerce perderá em média R$ 5.000,00 por dia útil".</p>
+      <p class="prose">Fica evidente que o papel do QA é defender a saúde do produto, e não atrasar a entrega.</p>
+      <p class="prose">O time, então, entende o valor da refatoração imediata.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 4 · Discussão</div>
+      <h2 class="slide-title">Discussão Orientada e Conexão com o <em>Projeto Macro</em></h2>
+      <p class="prose">Analisando esse simulado, reflitam sobre a entrega da SA de vocês para a feira de investidores.</p>
+      <p class="prose">Um investidor é extremamente analítico. Se durante a demonstração do protótipo da empresa júnior o sistema de vocês travar ou permitir um acesso indevido, toda a credibilidade tecnológica se perde, não importando quão revolucionária seja a ideia de negócio.</p>
+      <p class="prose">Para a feira, a comunicação entre o Dev e o responsável pela Qualidade da equipe de vocês precisará ser constante.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 4 · Discussão</div>
+      <h2 class="slide-title">O Brilho do <em>QA</em></h2>
+      <p class="prose">O QA da equipe não vai codificar as features principais, ele vai montar as "armadilhas" de teste, auditar as entregas parciais e documentar todo o processo de qualidade.</p>
+      <p class="prose">Quando o investidor perguntar "Como vocês garantem que esse produto é seguro e escalável?", não será o Dev quem vai brilhar, será o QA mostrando o plano de testes e os indicadores de estabilidade do sistema que vocês desenvolveram.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">05</span>
+      <div class="section-part">Parte 5</div>
+      <h2 class="section-heading">Refinamento Técnico e <span>Boas Práticas de Mercado</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 5 · Refinamento</div>
+      <h2 class="slide-title">Transição de <em>Mindset</em></h2>
+      <p class="prose">Nesta última etapa da aula, consolidamos a transição de mindset.</p>
+      <p class="prose">O mercado global já superou a fase onde "qualidade é responsabilidade apenas do departamento de testes".</p>
+      <p class="prose">Entramos na era onde o Engenheiro da Qualidade atua como um facilitador e mentor dentro do time.</p>
+      <p class="prose">Ele ensina o Desenvolvedor a escrever testes unitários melhores. Ele ensina o Analista de Negócios a escrever critérios de aceite mais testáveis utilizando BDD (Behavior-Driven Development), escrevendo cenários em Gherkin (Dado que... Quando... Então...).</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 5 · Refinamento</div>
+      <h2 class="slide-title">Escrevendo <em>"Bugs Ricos"</em></h2>
+      <p class="prose">É vital que vocês, enquanto técnicos em formação pelo SENAI, absorvam a prática de escrever "Bugs Ricos".</p>
+      <p class="prose">Um relatório de defeito mal escrito custa tempo da empresa.</p>
+      <p class="prose">Uma boa prática da engenharia de testes é garantir que todo Bug reportado contenha:</p>
+      <ul class="bullet-list">
+        <li>1. Título Resumido e Claro (Ex: [Login] Erro 404 ao submeter formulário com e-mail inválido).</li>
+        <li>2. Ambiente de Execução (Ex: Windows 11, Google Chrome v115, Servidor AWS Homologação).</li>
+        <li>3. Passos para Reproduzir (A receita de bolo exata para o Dev refazer e ver o erro).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 5 · Refinamento</div>
+      <h2 class="slide-title">Escrevendo <em>"Bugs Ricos"</em> (Continuação)</h2>
+      <ul class="bullet-list">
+        <li>4. Resultado Esperado (O que a documentação dizia que ia acontecer).</li>
+        <li>5. Resultado Obtido (O que de fato aconteceu, provando a falha).</li>
+        <li>6. Evidências (Logs de erro, gravação de tela, requisição de rede interceptada).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 5 · Execução</div>
+      <h2 class="slide-title">Preparação para o Desafio e Execução <em>Orientada</em></h2>
+      <p class="prose">O conhecimento teórico só tem valor quando aplicado. Com a compreensão de quem são os atores da qualidade, como eles se comportam e quais ferramentas utilizam mentalmente, é hora de agir no ambiente da nossa SA.</p>
+      <p class="prose">A qualidade do projeto inovador de vocês começa hoje com a documentação e definição de papéis.</p>
+      <p class="prose">Vocês precisarão incorporar a postura de um Analista de QA corporativo frente a um sistema recém construído.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 5 · Execução</div>
+      <h2 class="slide-title">A Zona de <em>Conforto</em></h2>
+      <p class="prose">O desafio prático que virá a seguir vai tirar vocês da zona de conforto.</p>
+      <p class="prose">Não pedirei para vocês encontrarem um erro óbvio numa tela colorida; vocês deverão estruturar um relatório formal e planejar preventivamente.</p>
+      <p class="prose">Sigam rigorosamente as instruções de contexto empresarial que detalharemos, focando na aplicação de técnicas de documentação de testes conforme previsto pela competência técnica da nossa disciplina.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">06</span>
+      <div class="section-part">Parte 6</div>
+      <h2 class="section-heading">FAQ - <span>Dúvidas Reais</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 6 · FAQ</div>
+      <div class="faq-item">
+        <div class="faq-q">1. QA é igual a programador? Se eu não gosto de programar, posso ser QA?</div><br>
+        <div class="faq-a"><b>Excelente pergunta. QA não é igual a programador (Desenvolvedor de Software), os objetivos são diferentes. O Dev constrói a aplicação, o QA garante a excelência e robustez da construção.</b></div>
+      </div>
+      <p class="prose" style="font-size: clamp(14px, 1.8vw, 17px);">No passado, era muito comum testadores manuais que não sabiam nenhuma linha de código. Hoje, para atuar como Analista de QA sênior ou Engenheiro da Qualidade, você precisa saber programar, mas não para criar o sistema, e sim para construir scripts de automação (robôs que testam o sistema por você). Se você quer entrar no mercado atual, a lógica de programação é indispensável na área de Qualidade.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 6 · FAQ</div>
+      <div class="faq-item">
+        <div class="faq-q">2. A inteligência artificial vai substituir o QA e o Testador de Software?</div><br>
+        <div class="faq-a"><b>A IA está transformando o papel do QA, não extinguindo. Ferramentas como o GitHub Copilot ou IAs gerativas podem criar scripts básicos de teste ou analisar dezenas de logs rapidamente.</b></div>
+      </div>
+      <p class="prose" style="font-size: clamp(14px, 1.8vw, 17px);">No entanto, o pensamento crítico, a compreensão profunda de uma regra de negócio complexa, a empatia com a jornada do usuário e a negociação com Stakeholders são capacidades inerentemente humanas. A IA vai substituir o "Testador Manual braçal" que apenas clica em botões repetidamente, mas vai potencializar o trabalho do "Engenheiro de Qualidade Estratégico".</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 6 · FAQ</div>
+      <div class="faq-item">
+        <div class="faq-q">3. O que eu faço se o Desenvolvedor ficar bravo com o meu relato de Bug e disser que "o usuário nunca vai fazer isso"?</div><br>
+        <div class="faq-a"><b>Esse é o clássico conflito de Soft Skills. Primeiro, mantenha a calma e o profissionalismo. Segundo, contra-argumente com dados e métricas de comportamento do usuário real.</b></div>
+      </div>
+      <p class="prose" style="font-size: clamp(14px, 1.8vw, 17px);">O sistema deve ser blindado contra o "caminho triste" (erros do usuário). Se houver impasse, a decisão sobe para o Product Owner (PO) avaliar o risco para o negócio. O papel do QA é informar o risco técnico e registrar o problema; a decisão gerencial sobre corrigir ou não pertence ao planejamento do projeto.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 6 · FAQ</div>
+      <div class="faq-item">
+        <div class="faq-q">4. O Dev me passou um código cheio de Bugs na última hora da Sprint. A culpa do atraso no projeto é do QA por não conseguir testar tudo a tempo?</div><br>
+        <div class="faq-a"><b>De forma alguma. Esse é um problema de processo e gestão ágil, não do QA. Qualidade não é a última etapa de uma corrida de revezamento.</b></div>
+      </div>
+      <p class="prose" style="font-size: clamp(14px, 1.8vw, 17px);">Se o código chegou com defeitos severos na última hora, a equipe falhou nas revisões de código (Code Review) prévias e faltou comunicação contínua (o conceito de Shift-Left). Em um time ágil de alta performance, QA e Dev testam pequenos pedaços de código diariamente, evitando o "efeito cascata" no fim da Sprint.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">07</span>
+      <div class="section-part">Parte 7</div>
+      <h2 class="section-heading">Desafio Prático <span>(Evidência de Desempenho)</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 7 · Desafio</div>
+      <h2 class="slide-title">Contexto da <em>Situação</em></h2>
+      <p class="prose">A empresa júnior de tecnologia na qual vocês operam está a três semanas da feira de inovação para investidores.</p>
+      <p class="prose">O time de desenvolvimento entregou o módulo crítico da aplicação: a "Área de Checkout de Investimentos" uma tela complexa onde o investidor insere valores para aportar na startup, seleciona o método de pagamento e valida a transação.</p>
+      <p class="prose">O histórico do time aponta problemas de falha de comunicação entre requisitos de negócio e código entregue. Vocês precisam auditar esse processo como especialistas de QA.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 7 · Desafio</div>
+      <h2 class="slide-title">Objetivo Técnico e <em>Requisitos</em></h2>
+      <p class="prose"><strong>Objetivo Técnico:</strong> Pesquisar e elaborar a estratégia macro de testes para este módulo crítico. Redigir um relatório de Defeito (Bug Report) formal e detalhado simulando uma anomalia encontrada, utilizando o padrão rigoroso de mercado.</p>
+      <div class="card">
+        <div class="card-title yellow">Requisitos Obrigatórios</div>
+        <ul class="bullet-list">
+          <li>1. O relatório de defeitos deve simular um erro lógico crítico no cálculo do aporte financeiro.</li>
+          <li>2. O documento deve apresentar rastreabilidade completa: Ambiente, Passos, Resultado Esperado vs. Atual, e Severidade.</li>
+          <li>3. A equipe deve justificar tecnicamente (em um parágrafo) por que a severidade escolhida se aplica ao negócio do investidor.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 7 · Desafio</div>
+      <h2 class="slide-title">Critérios de <em>Avaliação</em></h2>
+      <ul class="bullet-list">
+        <li>1. Completude técnica: O Bug Report possui todos os campos essenciais requeridos na aula?</li>
+        <li>2. Qualidade da evidência simulada: Os passos para reprodução são lógicos, sequenciais e fáceis de replicar por um desenvolvedor?</li>
+        <li>3. Linguagem profissional: Ausência de jargões opinativos, uso focado em evidências, refletindo as Soft Skills de comunicação abordadas.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 7 · Desafio</div>
+      <h2 class="slide-title">Passo a Passo <em>Sugerido</em></h2>
+      <ul class="bullet-list">
+        <li>1. Reúnam o grupo e leiam a documentação imaginária do "Módulo de Investimento" da SA de vocês.</li>
+        <li>2. Pensem no "caminho destrutivo": O que acontece se o investidor tentar aportar um valor negativo? Ou se houver perda de pacote de rede no momento do clique?</li>
+        <li>3. Escolham o cenário de falha mais crítico.</li>
+        <li>4. Usem um template digital (planilha ou ferramenta mock de Jira/Trello) para redigir o Bug Report.</li>
+        <li>5. Revisem o relato em grupo, se colocando na pele do Desenvolvedor: "Ao ler isso, eu consigo encontrar o erro exato no meu código?".</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 7 · Desafio</div>
+      <h2 class="slide-title">Entregáveis <em>Esperados</em></h2>
+      <p class="prose">Um arquivo PDF contendo a justificativa estratégica de qualidade para o módulo de checkout e a modelagem formal de um Bug Crítico no padrão de mercado, que comporá o portfólio de testes do projeto da empresa júnior.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <span class="section-number">08</span>
+      <div class="section-part">Parte 8</div>
+      <h2 class="section-heading">Conexão com <span>Próxima Aula</span></h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 8 · Fechamento</div>
+      <h2 class="slide-title">O Que <em>Compreendemos</em></h2>
+      <p class="prose">Hoje, compreendemos o "Quem" e o "Como" a cultura de qualidade é inserida em um time de alta performance de desenvolvimento, desmistificando o papel estático do testador clássico.</p>
+      <p class="prose">Vocês entenderam que um defeito que chega ao usuário final representa uma ruptura severa de processo.</p>
+      <p class="prose">Mas, na prática de engenharia, como classificamos a origem dessa ruptura de forma técnica e formalizada por normas internacionais?</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Parte 8 · Fechamento</div>
+      <h2 class="slide-title">Na Próxima <em>Aula</em></h2>
+      <p class="prose">Na nossa Próxima Aula, mergulharemos nos Pilares da Qualidade de Software, onde dissecaremos a anatomia técnica entre Erro, Defeito (Bug) e Falha, alicerçados nas normas ISO.</p>
+      <p class="prose">Preparados para entender como a indústria avalia o custo em dinheiro de cada linha de código mal escrita?</p>
+      <p class="prose">O rigor técnico aumentará substancialmente. Até lá!</p>
+    </div>
+  </div>
+
+  <div id="progress-bar" style="width: 0%;"></div>
+
+  <div id="nav">
+    <span id="slide-counter">01 / 47</span>
+    <button class="nav-btn" id="btn-prev" title="Anterior (←)">&#8592;</button>
+    <button class="nav-btn" id="btn-next" title="Próximo (→)">&#8594;</button>
+  </div>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  const counter = document.getElementById('slide-counter');
+  const bar = document.getElementById('progress-bar');
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  function goTo(next) {
+    if (next === current || next < 0 || next >= total) return;
+    slides[current].classList.remove('active');
+    current = next;
+    slides[current].classList.add('active');
+    counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+    bar.style.width = `${((current+1)/total)*100}%`;
+  }
+
+  // Inicializa o contador e a barra na carga da página
+  counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+  bar.style.width = `${((current+1)/total)*100}%`;
+
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+      e.preventDefault(); goTo(current+1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault(); goTo(current-1);
+    }
+  });
+
+  let touchStart = null;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (diff > 50) goTo(current+1);
+    else if (diff < -50) goTo(current-1);
+    touchStart = null;
+  });
+</script>
+</body>
+</html>

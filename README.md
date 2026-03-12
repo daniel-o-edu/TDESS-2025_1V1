@@ -1,8 +1,9 @@
 Repositório de Unidades Curriculares
 Este repositório é utilizado para centralizar os arquivos das seguintes unidades curriculares:
-• BADA (Banco de Dados)
-• PRAP (Programação de Aplicativos)
-Tambeḿ os documentos da Situação de Aprendizagem Integrada.
+
+• TESI (Teste de Sistemas)
+
+Também os documentos da Situação de Aprendizagem Integrada.
 
 *** Passo a passo para clonar o repositório em casa ***
 Para baixar os arquivos e trabalhar no seu computador, siga as instruções abaixo:

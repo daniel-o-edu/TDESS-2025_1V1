@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 03 – Pilares da Qualidade de Software</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #3d3d5c;
+    --accent: #c0392b;
+    --accent2: #2980b9;
+    --accent3: #27ae60;
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --border: #e0ddd5;
+    --code-bg: #f4f1eb;
+    --tag-bg: #eaf4fb;
+    --tag-border: #2980b9;
+    --slide-max: 100%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #ededea;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.18);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.1); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8vh 10vw;
+    animation: fadeIn .3s ease;
+  }
+  .slide.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(.95rem, 2vw, 1.05rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #eaf4fb;
+    border-left: 4px solid var(--accent2);
+    color: #1a3a50;
+  }
+  .callout.green {
+    background: #eafaf1;
+    border-left: 4px solid var(--accent3);
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #fdf0ee;
+    border-left: 4px solid var(--accent);
+    color: #3a1a18;
+  }
+  .callout.yellow {
+    background: #fefbe6;
+    border-left: 4px solid #f39c12;
+    color: #3a2e10;
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(.93rem, 2vw, 1rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(.9rem, 1.9vw, .98rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide active">
+    <div class="slide-label">Aula 03</div>
+    <h1>Pilares da Qualidade de Software</h1>
+    <p class="cover-desc">
+      Estudo das definições técnicas e normas que regem a qualidade de sistemas.
+    </p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Diferenciação técnica entre Bug, Defeito e Falha</div>
+      <div class="topic-chip">Conceitos e padrões baseados na ISO (25010)</div>
+      <div class="topic-chip">Impacto financeiro e custo do defeito</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 1</div>
+    <h2>Abertura da Aula</h2>
+    <p>A qualidade de um sistema não se resume apenas a não ter erros visíveis; ela envolve a aderência a normas internacionais, a compreensão profunda de como as falhas se originam e a consciência do impacto financeiro que um código mal testado pode gerar para uma empresa.</p>
+    <p>No mercado atual, onde um simples erro pode custar milhões ou expor dados sensíveis de milhares de usuários, entender esses pilares é fundamental.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 1</div>
+    <h2>Contextualização</h2>
+    <p>Durante esta aula, vamos explorar o que realmente significa qualidade no contexto de desenvolvimento, compreendendo as diferenças técnicas entre erros, defeitos e falhas, além de analisar os padrões da ISO 25010 e o custo dos defeitos.</p>
+    <p>Este conhecimento será a base para a nossa Situação de Aprendizagem (SA), na qual vocês estão construindo uma solução digital inovadora para uma feira de investidores.</p>
+    <div class="callout red">
+      <div class="callout-title">Atenção</div>
+      Afinal, nenhum investidor colocará seu dinheiro em um produto que não seja seguro, confiável e bem estruturado desde a sua concepção.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Conceitos Fundamentais</h2>
+      <p>Compreendendo erros, normas e os custos de manutenção.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Diferenciação Técnica entre Erro, Defeito (Bug) e Falha</h2>
+    <div class="callout blue">
+      <div class="callout-title">Explicação Teórica</div>
+      No universo do desenvolvimento e teste de software, os termos erro, defeito (ou bug) e falha costumam ser usados como sinônimos no dia a dia, mas tecnicamente eles representam estágios completamente diferentes do ciclo de vida de um problema.
+    </div>
+    <p>O <strong>Erro</strong> é a ação humana equivocada; ocorre quando o desenvolvedor, analista ou designer compreende mal um requisito ou comete um equívoco lógico ou de digitação.</p>
+    <p>Esse erro humano gera um <strong>Defeito (Bug)</strong>, que é a manifestação física desse erro no código-fonte ou na documentação do sistema (por exemplo, um sinal de + onde deveria ser -).</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>A Cadeia do Problema</h2>
+    <p>Por fim, a <strong>Falha</strong> é o comportamento indesejado que ocorre quando o código contendo o defeito é executado pelo sistema ou pelo usuário final.</p>
+    <div class="callout yellow">
+      <div class="callout-title">A Importância da Prevenção</div>
+      Entender essa cadeia (Erro humano > Defeito no código > Falha na execução) é essencial para aplicarmos testes preventivos, buscando eliminar os erros antes que se tornem defeitos, ou capturar os defeitos antes que os usuários experienciem as falhas.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Demonstração Prática</h2>
+    <p>Vamos analisar um exemplo simples em Python de um sistema de controle de estoque para entender essa cadeia na prática.</p>
+    <div class="code-block"># O analista definiu que o alerta de estoque baixo deve ocorrer quando a quantidade for menor que 10.
+
+def verificar_estoque(quantidade):
+    # ERRO HUMANO: O desenvolvedor digitou <= em vez de <
+    # DEFEITO (BUG): O código abaixo contém o defeito estrutural.
+    if quantidade <= 10:
+        return "Alerta: Estoque baixo!"
+    else:
+        return "Estoque adequado."
+
+# FALHA: Quando a quantidade for exatamente 10, o sistema dispara um alerta falso.
+# O usuário executa o programa e vê o comportamento incorreto.
+resultado = verificar_estoque(10)
+print(resultado) # Saída incorreta: Alerta: Estoque baixo!</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Explicação linha por linha</h2>
+    <ul>
+      <li><strong>O erro</strong> existiu na mente ou na digitação do programador ao não interpretar corretamente o requisito menor que 10.</li>
+      <li><strong>O defeito</strong> é a linha <code>if quantidade <= 10:</code>, que fica adormecida no código.</li>
+      <li><strong>A falha</strong> só acontece no momento em que a função é chamada com o valor 10 e retorna o alerta indevido, prejudicando a experiência do usuário do sistema de estoque.</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Prática e Fixação</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercício Guiado</div>
+      Analise o cenário abaixo e escreva num bloco de notas identificando claramente qual é o Erro, qual é o Defeito e qual é a Falha:<br><br>
+      <strong>Cenário:</strong> Um programador esqueceu de tratar a possibilidade de um usuário digitar texto em um campo de idade. Ao preencher o formulário, o usuário digita Vinte, clica em Salvar e o aplicativo trava e fecha sozinho na tela do celular.
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Exercício de Fixação</div>
+      Crie um pequeno script em Python (ou na linguagem de sua preferência) que calcule o preço com desconto de um produto. Insira propositalmente um erro lógico (como dar um desconto maior do que o permitido). Em seguida, comente no código identificando onde está o Erro, onde está o Defeito e escreva a chamada da função que provoca a Falha.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Conceitos e padrões baseados na ISO/IEC 25010</h2>
+    <div class="callout blue">
+      <div class="callout-title">Explicação Teórica</div>
+      A norma ISO/IEC 25010 é um padrão internacional que descreve o modelo de qualidade de software, fornecendo um framework rigoroso para avaliar se um sistema atende às necessidades de seus usuários e stakeholders.
+    </div>
+    <p>Ela divide a qualidade do produto de software em oito características principais:</p>
+    <ul>
+      <li><strong>Adequação Funcional</strong> - se faz o que deveria fazer,</li>
+      <li><strong>Eficiência de Desempenho</strong> - se é rápido e consome poucos recursos,</li>
+      <li><strong>Compatibilidade</strong> - se funciona com outros sistemas,</li>
+      <li><strong>Usabilidade</strong> - se é fácil de usar,</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Características da ISO 25010 (Continuação)</h2>
+    <ul>
+      <li><strong>Confiabilidade</strong> - se não cai e lida bem com erros,</li>
+      <li><strong>Segurança</strong> - se protege dados,</li>
+      <li><strong>Manutenibilidade</strong> - se é fácil alterar e atualizar o código e,</li>
+      <li><strong>Portabilidade</strong> - se roda em diferentes ambientes).</li>
+    </ul>
+    <p>Para profissionais de tecnologia, a ISO 25010 atua como um mapa; ela garante que os testes não foquem apenas em achar bugs de tela, mas sim em garantir que o sistema seja robusto, seguro e sustentável a longo prazo, critérios que o mercado moderno exige de soluções escaláveis.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Demonstração Prática</h2>
+    <p>Imagine que estamos testando o aplicativo financeiro da nossa Situação de Aprendizagem. Usar a ISO 25010 nos ajuda a planejar casos de teste estruturados:</p>
+    <div class="code-block">PLANO DE AVALIAÇÃO - APP DE INVESTIDORES (Baseado na ISO 25010)
+
+1. Adequação Funcional:
+   - Teste: O usuário consegue depositar fundos corretamente na carteira virtual?
+2. Usabilidade:
+   - Teste: Um usuário leigo consegue encontrar o extrato em menos de 3 cliques?
+3. Eficiência de Desempenho:
+   - Teste: O app carrega o gráfico de ações em menos de 2 segundos sob conexão 3G?
+4. Segurança:
+   - Teste: A senha do usuário está criptografada no banco de dados e os tokens expiram em 15 minutos?</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Profissionalizando o Teste</h2>
+    <p>Nesta demonstração, mapeamos requisitos simples para características formais de qualidade. Isso profissionaliza o trabalho do testador e do desenvolvedor, cobrindo áreas que poderiam ser esquecidas.</p>
+    
+    <div class="callout green">
+      <div class="callout-title">Exercício Guiado</div>
+      Recebemos um relato de um cliente sobre um e-commerce afirmando que foi comprar um tênis, achou o site lindo e fácil de encontrar os produtos. Porém, quando inseriu os dados do cartão de crédito, a tela congelou por 30 segundos e, logo depois, o site caiu, impedindo a conclusão da compra.<br>
+      Com base na ISO 25010, identifique quais características de qualidade foram bem atendidas e quais apresentaram falhas.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Prática Pessoal</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercício de Fixação</div>
+      Selecione o aplicativo que você mais utiliza no seu smartphone (como Instagram, WhatsApp ou Spotify).<br><br>
+      Escreva uma avaliação rápida desse aplicativo com base em pelo menos 4 características da ISO 25010, dando uma nota de 1 a 5 para cada uma e justificando o porquê da nota escolhida (ex: Usabilidade: 5, porque a interface é intuitiva).
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>O Custo do Defeito e a Regra de 10</h2>
+    <div class="callout blue">
+      <div class="callout-title">Explicação Teórica</div>
+      A análise do impacto financeiro de um defeito de software revela uma das leis mais importantes da engenharia de software: quanto mais tarde um defeito é descoberto, mais caro ele é para ser corrigido.
+    </div>
+    <p>Conhecida como a Curva de Custo do Defeito ou Regra de 10, esse conceito demonstra que um erro encontrado na fase de levantamento de requisitos custa um valor base (ex: R$ 10).</p>
+    <p>Se esse erro passar para a fase de codificação, custará 10 vezes mais (R$ 100) devido ao tempo de reescrita do código.</p>
+    <p>Se chegar à fase de testes do sistema, custará 100 vezes mais (R$ 1.000).</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>O Impacto na Produção</h2>
+    <p>E se a falha chegar ao ambiente de produção (nas mãos do cliente), o custo pode ser 1.000 vezes maior ou incalculável, envolvendo multas, perda de clientes, processos judiciais e danos irreparáveis à marca da empresa.</p>
+    <div class="callout yellow">
+      <div class="callout-title">Shift-Left Testing</div>
+      Por isso, a cultura moderna foca em trazer os testes e a garantia de qualidade para o início do desenvolvimento, prática conhecida como Shift-Left Testing, economizando dinheiro e tempo.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Demonstração Prática</h2>
+    <p>Vamos simular o cálculo do custo de um defeito relacionado a uma falha de conversão de moedas em um sistema financeiro.</p>
+    <div class="code-block">def calcular_custo_correcao(fase_descoberta):
+    custo_base_hora = 100.00 # R$ 100 reais por hora trabalhada
+
+    if fase_descoberta == "Requisitos":
+        horas_trabalho = 1
+        return custo_base_hora * horas_trabalho
+
+    elif fase_descoberta == "Codificacao":
+        horas_trabalho = 10
+        return custo_base_hora * horas_trabalho
+
+    elif fase_descoberta == "Producao":
+        # Parar sistema, criar patch de emergência, multas
+        horas_trabalho = 150
+        custos_extras = 50000.00 # Multas e processos
+        return (custo_base_hora * horas_trabalho) + custos_extras</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Simulando os Custos</h2>
+    <div class="code-block">print(f"Custo se descoberto no Requisito: R$ {calcular_custo_correcao('Requisitos')}")
+print(f"Custo se descoberto na Produção: R$ {calcular_custo_correcao('Producao')}")
+# Saída:
+# Custo se descoberto no Requisito: R$ 100.0
+# Custo se descoberto na Produção: R$ 65000.0</div>
+    <p>Essa lógica demonstra matematicamente para gestores e desenvolvedores a importância de investir tempo revisando requisitos e criando testes automatizados antes de publicar o sistema.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Prática e Fixação</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercício Guiado</div>
+      Uma equipe desenvolveu um sistema para cálculo de impostos. Havia uma regra fiscal nova que o analista ignorou no primeiro dia de projeto. Se ele tivesse revisado o documento, levaria 2 horas (R$ 50/hora). O bug só foi achado em produção, onde a empresa tomou uma multa de R$ 10.000,00 e o time levou 20 horas (R$ 80/hora, com hora extra) para corrigir o código. Calcule e compare o custo de prevenção vs o custo da falha.
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Exercício de Fixação</div>
+      Você é o líder técnico de uma startup. O CEO quer pular a fase de criação de testes automatizados e revisões para lançar o produto mais rápido. Baseado no conceito de Custo do Defeito, escreva um e-mail de 1 parágrafo (pelo menos 5 linhas) para o seu CEO argumentando com fatos e lógica técnica o porquê essa decisão pode falir a empresa no longo prazo.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Demonstração Aplicada</h2>
+      <p>Visualizando como os pilares se conectam no dia a dia da empresa.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 3</div>
+    <h2>Aplicando no App da Feira de Inovação</h2>
+    <p>Imagine a criação de uma API de login para o nosso aplicativo da Feira de Inovação.</p>
+    <ul>
+      <li><strong>O Cenário:</strong> A equipe de desenvolvimento cria a funcionalidade de login de investidores, mas comete um <strong>Erro</strong> ao não criptografar adequadamente o token de sessão armazenado no navegador.</li>
+      <li><strong>A ISO 25010:</strong> A equipe de Qualidade (QA) decide aplicar as diretrizes da ISO 25010 e foca na característica de <strong>Segurança</strong>. Eles criam testes para simular um ataque de sequestro de sessão (Session Hijacking).</li>
+      <li><strong>O Defeito e a Falha:</strong> Durante os testes em ambiente isolado, o QA descobre o <strong>Defeito</strong> no código de geração de token. Ao realizar o ataque, ele provoca a <strong>Falha</strong> do sistema (conseguir logar como outro usuário).</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 3</div>
+    <h2>O Retorno do Investimento</h2>
+    <ul>
+      <li><strong>O Custo Evitado:</strong> Como o problema foi pego na fase de testes (antes de ir para a internet), o custo foi apenas as horas do QA e do Desenvolvedor para refatorar o código.</li>
+    </ul>
+    <div class="callout yellow">
+      <div class="callout-title">Impacto Evitado</div>
+      Se isso chegasse a público durante a Feira de Investidores, as contas financeiras seriam expostas, a empresa violaria a LGPD, sofreria processos altíssimos e a credibilidade do produto iria a zero. O investimento no pilar da qualidade salvou a startup.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Casos Reais do Mercado</h2>
+      <p>Avaliando o impacto de falhas no mundo real.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 4</div>
+    <h2>Exemplos de Falhas Históricas</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Caso 1: O Defeito Milionário</h4>
+        Em 2012, uma firma faliu em apenas 45 minutos. Um desenvolvedor esqueceu de desativar um código antigo não utilizado durante uma atualização de sistema (um Erro que virou Defeito). Quando o sistema entrou em produção, a Falha se manifestou comprando e vendendo ações descontroladamente. Em 45 minutos, eles perderam 440 milhões de dólares. A causa raiz foi ausência de qualidade rigorosa (ISO 25010 - Confiabilidade).
+      </div>
+      <div class="col-card">
+        <h4>Caso 2: Black Friday (Eficiência de Desempenho)</h4>
+        O sistema funciona perfeitamente para 1.000 usuários simultâneos (Adequação funcional). Porém, quando há 100.000 acessos, o banco de dados trava (Falha de Eficiência de Desempenho - ISO 25010). O custo: perda de milhões em vendas por hora, além de publicidade negativa nas redes sociais. Hoje isso é mitigado com Testes de Carga.
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>FAQ – Dúvidas Reais de Alunos</h2>
+      <p>Perguntas frequentes e respostas fundamentadas.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5</div>
+    <h2>Dúvidas Reais (1/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">Qual a diferença prática entre erro e bug?</div>
+      <div class="faq-a">O erro é a sua falha humana: uma falta de atenção, um esquecimento de uma regra de negócio ou digitar a tecla errada. O bug (defeito) é a consequência do seu erro inserida no código-fonte. O erro está em você; o bug está na máquina.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Preciso decorar a ISO 25010 inteira?</div>
+      <div class="faq-a">Não. O objetivo não é memorizar a norma, mas internalizar suas características principais (Funcionalidade, Usabilidade, Segurança, Desempenho, etc.) para que você tenha um checklist mental abrangente ao desenvolver e testar aplicações.</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5</div>
+    <h2>Dúvidas Reais (2/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">Se aplicar testes e padrões atrasar o lançamento, vale a pena?</div>
+      <div class="faq-a">Sim. O retrabalho e as multas por sistemas defeituosos custam exponencialmente mais. Lançar rápido um produto cheio de falhas apenas destrói a confiança do cliente e infla os custos de manutenção (Regra de 10).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Quem é responsável por encontrar falhas: Desenvolvedor ou QA?</div>
+      <div class="faq-a">Hoje, a responsabilidade é de todos. O desenvolvedor deve realizar testes unitários no seu próprio código para eliminar defeitos lógicos, enquanto o QA foca em testes exploratórios e aderência aos requisitos (ISO 25010).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Como provar para o chefe ou cliente que precisamos testar antes?</div>
+      <div class="faq-a">Apresente números reais. Utilize o conceito da curva de custo do defeito e traga exemplos de mercado. Argumente que o teste é uma métrica de redução de riscos financeiros, não apenas um capricho técnico.</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Desafio Prático</h2>
+      <p>Garantindo a Qualidade da Situação de Aprendizagem.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Diagnóstico de Qualidade</h2>
+    <div class="callout blue">
+      <div class="callout-title">Contexto</div>
+      Vocês foram designados para analisar a arquitetura do projeto da Situação de Aprendizagem (a plataforma de inovação digital para a feira de investidores). A diretoria quer garantir que o software seja impecável antes da apresentação final e pediu um Diagnóstico de Qualidade.
+    </div>
+    <h3>Requisitos do Desafio:</h3>
+    <ul>
+      <li>Mapeie 3 funcionalidades vitais do seu aplicativo (Ex: Cadastro de Startups, Match com Investidores, Chat).</li>
+      <li>Para cada funcionalidade, crie um cenário onde um <strong>Erro humano</strong> de desenvolvimento poderia gerar um <strong>Defeito</strong>, e explique qual seria a <strong>Falha</strong> resultante para o investidor.</li>
+      <li>Classifique cada uma dessas funcionalidades nas características de qualidade da <strong>ISO 25010</strong> que são exigidas para elas.</li>
+      <li>Faça uma estimativa fictícia de horas demonstrando o custo de consertar isso na etapa de levantamento de requisitos versus no meio da apresentação ao vivo na feira.</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Entregáveis do Desafio</h2>
+    <div class="callout green">
+      <div class="callout-title">Resultado Esperado</div>
+      Um documento técnico estruturado (pode ser no Word ou Markdown) de no mínimo 1 página, contendo o fluxo de falhas e justificativas embasadas nas normas estudadas.
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">Sugestão de Solução</div>
+      Comece criando uma tabela simples (Funcionalidade | Erro Possível | Defeito Gerado | Falha em Prod | Categoria ISO | Custo Requisito | Custo Prod). Debata com o seu grupo os impactos reais que os investidores sentiram.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 7</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>Todo o trabalho que vocês farão no desenvolvimento da plataforma para a feira de investidores estará alicerçado no conteúdo de hoje. Quando forem documentar o código, planejar a estrutura e validar as entregas do sistema web funcional, vocês não estarão testando às cegas.</p>
+    <p>Estarão avaliando a aplicação utilizando os critérios de avaliação da ISO 25010 e argumentando sobre as decisões tomadas em seu projeto embasados na economia gerada ao resolver bugs o mais cedo possível.</p>
+    <p>O projeto de vocês valerá o investimento simulado não só pelas ideias, mas porque será um software de altíssima confiabilidade e aderência às normas do mercado profissional.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 8</div>
+    <h2>Preparação para a Próxima Aula</h2>
+    <p>Agora que já dominamos os <strong>Pilares da Qualidade</strong>, sabemos <strong>o que</strong> buscar ao olhar para um software e por que isso é crucial técnica e financeiramente.</p>
+    <p>Na <strong>Próxima Aula</strong>, daremos um passo à frente entrando na <strong>Estrutura e Níveis de Teste</strong>. Nós aprenderemos exatamente <strong>como</strong> e <strong>quando</strong> testar essas qualidades.</p>
+    <div class="callout blue">
+      <div class="callout-title">Os Próximos Passos</div>
+      Vamos explorar os Testes Unitários, Testes de Integração e Testes de Sistema. Prepararem-se, pois começaremos a pensar como engenheiros de software estruturando barreiras de proteção diretas no código do projeto!
+    </div>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 32</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    let diff = touchX - e.changedTouches[0].clientX;
+    if (diff > 50) changeSlide(1);
+    else if (diff < -50) changeSlide(-1);
+  });
+
+  // Inicializa o progresso
+  showSlide(0);
+</script>
+
+</body>
+</html>

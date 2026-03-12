@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introdução ao Teste de Sistemas</title>
+<style>
+  :root { --bg: #ffffff; --surface: #f5f7fa; --accent: #1a56db; --accent2: #0e7a5c; --accent3: #c0392b; --text: #111827; --muted: #4b5563; --border: #d1d5db; --code-bg: #f0f2f5; --highlight: #e8f0fe; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; height: 100vh; overflow: hidden; }
+  #deck { width: 100vw; height: 100vh; position: relative; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(30px, 5vw, 80px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; background: var(--bg); }
+  .slide.active { opacity: 1; pointer-events: all; }
+  .content-box { max-width: 900px; width: 100%; padding: clamp(20px, 3vw, 40px); }
+  .slide-label { font-size: clamp(13px, 2vw, 17px); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; text-align: center; }
+  .slide-title { font-size: clamp(24px, 5vw, 48px); font-weight: 700; line-height: 1.2; margin-bottom: 24px; color: var(--text); text-align: center; border-bottom: 3px solid var(--accent); padding-bottom: 16px; }
+  .slide-title em { color: var(--accent); font-style: normal; }
+  .slide-hero { background: #f0f4f8; border-left: 8px solid var(--accent); justify-content: center; }
+  .hero-kicker { font-size: clamp(14px, 2.5vw, 19px); font-weight: 700; letter-spacing: 2px; color: var(--accent); margin-bottom: 16px; text-transform: uppercase; text-align: center; }
+  .hero-title { font-size: clamp(32px, 7vw, 68px); font-weight: 700; line-height: 1.1; margin-bottom: 16px; text-align: center; }
+  .hero-title span { color: var(--accent); }
+  .hero-subtitle { font-size: clamp(16px, 2.5vw, 22px); color: var(--muted); line-height: 1.6; margin-bottom: 28px; text-align: center; }
+  .hero-objectives { display: flex; flex-direction: column; gap: 12px; max-width: 700px; margin: 0 auto; }
+  .hero-obj-item { display: flex; align-items: flex-start; gap: 14px; font-size: clamp(15px, 2.2vw, 19px); line-height: 1.5; }
+  .hero-obj-item .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
+  .slide-section { background: #e8eef5; justify-content: center; }
+  .section-number { font-size: clamp(80px, 18vw, 180px); font-weight: 700; color: rgba(26,86,219,0.1); line-height: 1; margin-bottom: -10px; text-align: center; }
+  .section-part { font-size: clamp(14px, 2.5vw, 18px); font-weight: 700; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .section-heading { font-size: clamp(28px, 6vw, 60px); font-weight: 700; line-height: 1.1; color: var(--text); text-align: center; }
+  .section-heading span { color: var(--accent); }
+  .section-sub { font-size: clamp(15px, 2.2vw, 20px); color: var(--muted); margin-top: 18px; max-width: 600px; line-height: 1.6; text-align: center; margin-left: auto; margin-right: auto; }
+  .prose { font-size: clamp(16px, 2.2vw, 20px); line-height: 1.7; color: var(--muted); margin: 16px 0; }
+  .prose strong { color: var(--text); font-weight: 700; }
+  .prose em { color: var(--accent); font-weight: 700; font-style: normal; }
+  .analogy-box { border-left: 4px solid var(--accent); background: var(--highlight); border-radius: 0 8px 8px 0; padding: clamp(16px, 2.5vw, 24px); margin: 20px 0; font-size: clamp(16px, 2.2vw, 19px); line-height: 1.7; }
+  .analogy-box strong { color: var(--accent); }
+  .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+  .bullet-list li { display: flex; align-items: flex-start; gap: 12px; font-size: clamp(16px, 2.2vw, 19px); line-height: 1.6; color: var(--muted); }
+  .bullet-list li::before { content: '▸'; color: var(--accent); font-size: 16px; margin-top: 4px; flex-shrink: 0; }
+  .bullet-list li strong { color: var(--text); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: clamp(18px, 2.5vw, 28px); margin: 16px 0; }
+  .card-title { font-size: clamp(14px, 2vw, 18px); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+  .card-title.yellow { color: #b45309; } .card-title.green { color: var(--accent2); } .card-title.red { color: var(--accent3); } .card-title.blue { color: var(--accent); }
+  .styled-table { width: 100%; border-collapse: collapse; font-size: clamp(15px, 2vw, 19px); margin: 20px 0; }
+  .styled-table thead tr { background: var(--accent); }
+  .styled-table th { padding: 14px 18px; text-align: left; font-weight: 700; color: #ffffff; font-size: clamp(14px, 2vw, 18px); }
+  .styled-table td { padding: 12px 18px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  .styled-table tr:nth-child(even) td { background: var(--surface); }
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: clamp(16px, 2.5vw, 24px); font-family: 'Courier New', monospace; font-size: clamp(15px, 2vw, 18px); line-height: 1.7; overflow-x: auto; margin: 20px 0; }
+  .code-block .kw { color: #9b2335; font-weight: 700; } .code-block .cls { color: var(--accent); font-weight: 700; } .code-block .str { color: var(--accent2); } .code-block .cmt { color: #9ca3af; font-style: italic; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; justify-content: center; }
+  .badge { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 18px; font-family: 'Courier New', monospace; font-size: clamp(14px, 2vw, 18px); }
+  .badge.good { border-color: var(--accent2); color: var(--accent2); background: #f0fdf4; } .badge.bad { border-color: var(--accent3); color: var(--accent3); background: #fef2f2; text-decoration: line-through; }
+  .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: clamp(16px, 2.5vw, 24px); display: flex; gap: 18px; align-items: flex-start; margin: 12px 0; }
+  .step-number { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #ffffff; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 700; font-size: clamp(16px, 2.2vw, 20px); color: var(--text); margin-bottom: 6px; }
+  .step-desc { font-size: clamp(15px, 2vw, 19px); color: var(--muted); line-height: 1.6; }
+  .checklist { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+  .check-item { display: flex; align-items: flex-start; gap: 14px; font-size: clamp(16px, 2.2vw, 20px); line-height: 1.5; }
+  .check-box { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 2px; background: #fff; }
+  .rm-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 20px; font-size: clamp(15px, 2vw, 19px); margin: 8px 0; }
+  .rm-item.active { background: var(--highlight); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .rm-item.done { background: #f0fdf4; border-color: var(--accent2); color: var(--accent2); font-weight: 700; }
+  .faq-item { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: clamp(14px, 2vw, 20px); margin: 12px 0; }
+  .faq-q { font-weight: 700; color: var(--accent); font-size: clamp(16px, 2.2vw, 20px); margin-bottom: 8px; }
+  .faq-a { font-size: clamp(15px, 2vw, 19px); color: var(--muted); line-height: 1.65; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.4s ease; z-index: 100; }
+  #nav { position: fixed; bottom: 20px; right: 24px; display: flex; align-items: center; gap: 12px; z-index: 100; }
+  #slide-counter { font-size: clamp(14px, 1.8vw, 17px); color: var(--muted); font-weight: 700; }
+  .nav-btn { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--border); background: #fff; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .nav-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (max-width: 600px) { .slide { padding: 20px; } .content-box { padding: 16px; } }
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <div class="slide slide-hero active">
+    <div class="content-box">
+      <div class="hero-kicker">Aula 00</div>
+      <h1 class="hero-title">Introdução ao <span>Teste de Sistemas</span></h1>
+      <p class="hero-subtitle">Contexto, Conceitos Fundamentais e o Impacto da Qualidade no Desenvolvimento de Software. </p>
+      
+      <div class="hero-objectives">
+        <div class="hero-obj-item">
+          <div class="dot"></div>
+          <span><strong>Papel do QA:</strong> Garantir valor, segurança e usabilidade.</span>
+        </div>
+        <div class="hero-obj-item">
+          <div class="dot"></div>
+          <span><strong>Conceitos:</strong> Diferença entre Erro, Defeito e Falha.</span>
+        </div>
+        <div class="hero-obj-item">
+          <div class="dot"></div>
+          <span><strong>Prática:</strong> Tipos de testes (Caixa-Branca vs. Caixa-Preta).</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">01</div>
+      <div class="section-part">Contextualização</div>
+      <h2 class="section-heading">O Desafio do <span>QA</span></h2>
+      <p class="section-sub">Entendendo o cenário da Situação de Aprendizagem e a evolução histórica dos testes.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">O Desafio do Semestre</div>
+      <h2 class="slide-title">Nosso Papel como <em>QA</em></h2>
+      <p class="prose">
+        Vocês atuarão como uma equipe de desenvolvimento criando uma solução para uma <strong>feira de investidores</strong>. O risco é alto: investidores não toleram falhas críticas. 
+      </p>
+      <div class="card">
+        <div class="card-title blue">A Missão</div>
+        <p class="prose">
+          O papel de vocês não é apenas "caçar erros", mas garantir que o produto entregue tenha <strong>valor</strong>, <strong>segurança</strong> e <strong>usabilidade</strong>. Se falhar na apresentação, o investimento é perdido. 
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Anos 60 e 70</div>
+      <h2 class="slide-title">Debugging vs. <em>Testes</em></h2>
+      <p class="prose">
+        Antigamente, não existia o "testador". O próprio programador testava apenas para ver "se funciona" (debugging). O grande problema disso é o <strong>viés de confirmação</strong>. 
+      </p>
+      <ul class="bullet-list">
+        <li><strong>O Caminho Feliz:</strong> O dev testa só o fluxo que sabe que funciona (usuário e senha corretos). </li>
+        <li><strong>O que é ignorado:</strong> Senha errada, campo vazio, usuário inexistente, tentativas repetidas. </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Para entender melhor</div>
+      <h2 class="slide-title">A Ilusão do <em>"Funciona"</em></h2>
+      
+      <div class="analogy-box">
+        <p>
+          Testar apenas o "caminho feliz" é como verificar a segurança de uma casa testando apenas se a sua chave abre a porta.
+          <br><br>
+          <strong>Você confirmou que entra, mas esqueceu de checar se a janela dos fundos está aberta ou se qualquer chave mestra também abre a porta.</strong>
+        </p>
+      </div>
+      <p class="prose">
+        O código pode parecer "ok" para o desenvolvedor, mas está cheio de buracos do ponto de vista do usuário. 
+      </p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">STLC</div>
+      <h2 class="slide-title">O Analista de Testes no <em>Ciclo</em></h2>
+      <p class="prose">
+        O QA não entra apenas no final. Ele começa antes do código (Shift Left Testing). 
+      </p>
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <div class="step-title">Análise de Requisitos</div>
+          <div class="step-desc">Identifica ambiguidades e pergunta: "Isso dá para testar?" </div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <div class="step-title">Planejamento e Design</div>
+          <div class="step-desc">Define estratégia, cria Casos de Teste (passo a passo) e Cenários. </div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-body">
+          <div class="step-title">Execução e Gestão</div>
+          <div class="step-desc">Mão na massa, comparação de resultados e reporte detalhado de bugs.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Responsabilidades</div>
+      <h2 class="slide-title">Os 4 Pilares do <em>Analista</em></h2>
+      
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Pilar</th>
+            <th>O que o Analista faz</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Garantia</strong></td>
+            <td>Assegura que o sistema faz o que o requisito diz.</td>
+          </tr>
+          <tr>
+            <td><strong>Exploração</strong></td>
+            <td>Pensa "fora da caixa" para achar erros não planejados.</td>
+          </tr>
+          <tr>
+            <td><strong>Comunicação</strong></td>
+            <td>Traduz falhas técnicas para termos de negócio.</td>
+          </tr>
+          <tr>
+            <td><strong>Advocacia</strong></td>
+            <td>Defende a usabilidade (é difícil de usar?).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Perfil Profissional</div>
+      <h2 class="slide-title">O <em>Destructive Mindset</em></h2>
+      <p class="prose">
+        Um bom analista possui uma "mentalidade destrutiva" no bom sentido. 
+      </p>
+      <div class="checklist">
+        <div class="check-item">
+          <div class="check-box" style="background:var(--accent)"></div>
+          <span><strong>Curiosidade Cética:</strong> Não acredita no "está pronto, nem precisa testar". </span>
+        </div>
+        <div class="check-item">
+          <div class="check-box" style="background:var(--accent)"></div>
+          <span><strong>Atenção aos Detalhes:</strong> Pixel desalinhado ou erro gramatical.</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box" style="background:var(--accent)"></div>
+          <span><strong>Empatia:</strong> Se coloca no lugar do usuário sob pressão.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">02</div>
+      <div class="section-part">Conceitos Fundamentais</div>
+      <h2 class="section-heading">Definições e a <em>Tríade</em></h2>
+      <p class="section-sub">O que é um Bug? O que é testar? Entendendo a anatomia do erro.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Origem Histórica</div>
+      <h2 class="slide-title">9 de Setembro de 1947</h2>
+      <p class="prose">
+        A equipe de Grace Hopper trabalhava no Mark II em Harvard quando a máquina parou.
+      </p>
+      <div class="card">
+        <div class="card-title yellow">O Primeiro Caso Real</div>
+        <p class="prose">
+          A causa foi uma <strong>mariposa (moth)</strong> presa em um relé. Eles colaram o inseto no diário de bordo: "First actual case of bug being found". Daí surgiu o termo <em>Debugging</em> (desinsetizar). 
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Glenford Myers</div>
+      <h2 class="slide-title">O que é <em>Testar</em>?</h2>
+      <p class="prose">
+        Conceito vital: Testar não é provar que funciona.
+      </p>
+      <div class="analogy-box">
+        <p><strong>"Teste é o processo de executar um programa com a intenção de encontrar erros."</strong> </p>
+      </div>
+      <ul class="bullet-list">
+        <li><strong>Provar que funciona:</strong> Leva ao viés de confirmação (escolher caminhos fáceis).</li>
+        <li><strong>Encontrar erros:</strong> Você vira um investigador buscando "cantos escuros". </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Princípios do QA</div>
+      <h2 class="slide-title">As Leis de <em>Myers</em></h2>
+      
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <div class="step-title">O Teste "Bom"</div>
+          <div class="step-desc">É aquele com alta probabilidade de encontrar um erro ainda não descoberto.</div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <div class="step-title">O Teste "Bem-sucedido"</div>
+          <div class="step-desc">É aquele que <strong>encontra</strong> um erro, não o que passa "limpo". (Igual a um exame médico). </div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-body">
+          <div class="step-title">Independência</div>
+          <div class="step-desc">O desenvolvedor não deve testar seu próprio código (ponto cego psicológico).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Cadeia de Causalidade</div>
+      <h2 class="slide-title">Erro, Defeito e <em>Falha</em></h2>
+      <p class="prose">Não são sinônimos. É uma relação linear e progressiva. </p>
+      
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Termo</th>
+            <th>O que é?</th>
+            <th>Onde acontece?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Erro</strong></td>
+            <td>Ação humana (equívoco). </td>
+            <td>Na mente/ação do dev. </td>
+          </tr>
+          <tr>
+            <td><strong>2. Defeito</strong></td>
+            <td>O "Bug" físico no artefato. </td>
+            <td>No código (pode dormir lá). </td>
+          </tr>
+          <tr>
+            <td><strong>3. Falha</strong></td>
+            <td>O comportamento inesperado. </td>
+            <td>Em tempo de execução. </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Exemplo de Código</div>
+      <h2 class="slide-title">A Calculadora <em>Quebrada</em></h2>
+      
+      <div class="checklist">
+        <div class="check-item">
+          <span><strong>Erro:</strong> Dev pensa que soma é asterisco (*).</span>
+        </div>
+        <div class="check-item">
+          <span><strong>Defeito:</strong> O código escrito errado.</span>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <span class="kw">function</span> <span class="cls">soma</span>(a, b) {<br>
+        &nbsp;&nbsp;<span class="kw">return</span> a <span class="kw">*</span> b; <span class="cmt">// O defeito está aqui</span><br>
+        }
+      </div>
+
+      <div class="card">
+        <div class="card-title red">A Falha</div>
+        <p class="prose">
+          Se o usuário digitar <strong>2 + 2</strong>, retorna 4. (Sem falha visível). <br>
+          Se o usuário digitar <strong>2 + 3</strong>, retorna 6 (Era esperado 5). <strong>Aqui ocorre a Falha.</strong> 
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Atividade Mental</div>
+      <h2 class="slide-title">Caso do Cupom de <em>Desconto</em></h2>
+      <p class="prose">Requisito: Desconto para compras estritamente <strong>ACIMA</strong> de R$ 100,00. </p>
+      
+      <div class="code-block">
+        <span class="cmt">// O que o Dev escreveu (distraído):</span><br>
+        <span class="kw">if</span> (valor_compra <span class="kw">&gt;=</span> 100) { <br>
+        &nbsp;&nbsp;aplicar_desconto(0.15); <br>
+        }
+      </div>
+
+      <ul class="bullet-list">
+        <li><strong>Ana (R$ 80):</strong> Pagou R$ 80. (Sem falha, apesar do defeito).</li>
+        <li><strong>Bruno (R$ 100):</strong> Ganhou desconto indevido. <strong>FALHA!</strong> </li>
+      </ul>
+      <p class="prose" style="font-size: 0.9em; margin-top: 10px;">
+        <em>Reflexão: A compra da Ana não ativou a falha porque o fluxo não passou pela condição errada.</em> 
+      </p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">03</div>
+      <div class="section-part">Impacto da Qualidade</div>
+      <h2 class="section-heading">Custo e <em>Desastres</em></h2>
+      <p class="section-sub">Por que testar cedo e o que acontece quando falhamos em produção.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Lei de Myers</div>
+      <h2 class="slide-title">O Custo <em>Exponencial</em></h2>
+      <p class="prose">Quanto mais tarde o defeito é descoberto, mais caro é corrigir. </p>
+      
+      <div class="step-card">
+        <div class="step-number" style="background:var(--accent2)">1x</div>
+        <div class="step-body">
+          <div class="step-title">Requisitos</div>
+          <div class="step-desc">Apagar uma linha no Word.</div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number" style="background:#f59e0b">10x</div>
+        <div class="step-body">
+          <div class="step-title">Codificação</div>
+          <div class="step-desc">Reescrever o código.</div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number" style="background:var(--accent3)">40x</div>
+        <div class="step-body">
+          <div class="step-title">Testes</div>
+          <div class="step-desc">Reabrir tarefa, corrigir, retestar.</div>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number" style="background:#000">>100x</div>
+        <div class="step-body">
+          <div class="step-title">Produção</div>
+          <div class="step-desc">Imagem da empresa, processos, perda de clientes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Desastres de Software</div>
+      <h2 class="slide-title">Quando a Falta de Teste <em>Mata</em></h2>
+      
+      <div class="card">
+        <div class="card-title red">Knight Capital ($440 Milhões)</div>
+        <p class="prose" style="font-size: 0.9em">
+          Código morto ("zumbi") foi ativado acidentalmente em produção. Comprou ações descontroladamente. Prejuízo de US$ 440 mi em 45 min. 
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title red">Therac-25 (Vidas Humanas)</div>
+        <p class="prose" style="font-size: 0.9em">
+          Condição de corrida (Race Condition). Se o operador digitasse muito rápido, a máquina irradiava o paciente sem proteção. Causou mortes.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title red">Ariane 5 (Explosão)</div>
+        <p class="prose" style="font-size: 0.9em">
+          Reutilização de código do Ariane 4. Overflow de inteiro (velocidade horizontal > 16 bits). Autodestruição em 37s.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Cultura de QA</div>
+      <h2 class="slide-title">Verdade ou <em>Mito</em>?</h2>
+      
+      <div class="badge-row">
+        <span class="badge bad">Programador testa bem seu código</span>
+        <span class="badge good">Cegueira do Criador </span>
+      </div>
+      
+      <div class="badge-row">
+        <span class="badge bad">Testador é inimigo do Dev</span>
+        <span class="badge good">Mesmo time, mesmo objetivo</span>
+      </div>
+
+      <div class="badge-row">
+        <span class="badge bad">Pronto quando acaba o código</span>
+        <span class="badge good">Pronto quando atestado pelos testes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <h2 class="slide-title">Perguntas <em>Comuns</em></h2>
+      
+      <div class="faq-item">
+        <div class="faq-q">O desenvolvedor não pode testar o próprio código?</div>
+        <div class="faq-a">Pode e deve (Unitários), mas ele tem o viés de confirmação. O QA independente é necessário para achar o que o dev não viu. </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-q">Todo defeito gera uma falha?</div>
+        <div class="faq-a">Não. Um defeito pode ficar "dormindo" no código e só gerar falha quando executado sob condições específicas (Ex: Compra da Ana).</div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">04</div>
+      <div class="section-part">Tipos de Teste e Prática</div>
+      <h2 class="section-heading">Classificações e <em>Atividade</em></h2>
+      <p class="section-sub">Caixa-Branca, Caixa-Preta e a tarefa para a próxima aula.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Classificações Iniciais</div>
+      <h2 class="slide-title">Caixa-Branca vs. <em>Caixa-Preta</em></h2>
+      
+      <div class="card">
+        <div class="card-title blue">Caixa-Branca (Estrutural)</div>
+        <ul class="bullet-list">
+          <li><strong>Visão:</strong> O testador VÊ o código fonte. </li>
+          <li><strong>Foco:</strong> Lógica interna, loops, `if/else`.</li>
+          <li><strong>Exemplo:</strong> Garantir que todos os ramos do código são executados.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title green">Caixa-Preta (Funcional)</div>
+        <ul class="bullet-list">
+          <li><strong>Visão:</strong> O testador NÃO vê o código. Age como usuário.</li>
+          <li><strong>Foco:</strong> Entradas e Saídas (O que o sistema faz).</li>
+          <li><strong>Exemplo:</strong> Clicar em "Calcular" e verificar o resultado na tela.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Prática (Pesquisa)</div>
+      <h2 class="slide-title">Atividade para <em>Entrega</em></h2>
+      <p class="prose">Elaborem um documento detalhando (Definição, Exemplo e Diagrama) para os tópicos abaixo.</p>
+      
+      <div class="checklist">
+        <div class="check-item"><div class="check-box"></div><span>Caixa-Preta vs. Caixa-Branca</span></div>
+        <div class="check-item"><div class="check-box"></div><span>Testes Funcionais (O que validam?)</span></div>
+        <div class="check-item"><div class="check-box"></div><span>Testes de Aceitação (Quem realiza?)</span></div>
+        <div class="check-item"><div class="check-box"></div><span>Testes Exploratórios (Sem roteiro)</span></div>
+        <div class="check-item"><div class="check-box"></div><span>Testes de Regressão (Por que retestar?)</span></div>
+        <div class="check-item"><div class="check-box"></div><span>Unidade vs. Integração</span></div>
+      </div>
+      <p class="prose" style="font-size: 0.9em; text-align: center; color: var(--accent3); font-weight: bold;">
+        Entrega até o fim desta aula no AVA. 
+      </p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <h2 class="slide-title">Resumo da <em>Aula</em></h2>
+      <div class="rm-item done">Evolução: Do debugging para o QA preventivo.</div>
+      <div class="rm-item done">Definição: Testar é tentar destruir (encontrar erros).</div>
+      <div class="rm-item done">Tríade: Erro (Humano) -> Defeito (Código) -> Falha (Execução).</div>
+      <div class="rm-item done">Custo: Corrigir em produção custa >100x.</div>
+      <div class="rm-item done">Tipos: Caixa-Branca (Código) vs. Caixa-Preta (Funcional).</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="progress-bar"></div>
+<div id="nav">
+  <span id="slide-counter">00 / 00</span>
+  <button class="nav-btn" id="btn-prev">&#8592;</button>
+  <button class="nav-btn" id="btn-next">&#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+  const counter = document.getElementById('slide-counter');
+  const bar = document.getElementById('progress-bar');
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function goTo(next) {
+    if (next === current || next < 0 || next >= total) return;
+    slides[current].classList.remove('active');
+    current = next;
+    slides[current].classList.add('active');
+    counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+    bar.style.width = `${((current+1)/total)*100}%`;
+  }
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current+1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current-1); }
+  });
+  let touchStart = null;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (touchStart === null) return;
+    const dx = e.changedTouches[0].clientX - touchStart;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current+1 : current-1);
+    touchStart = null;
+  });
+  if(total > 0) { slides[0].classList.add('active'); counter.textContent = `01 / ${pad(total)}`; bar.style.width = `${(1/total)*100}%`; }
+</script>
+</body>
+</html>
