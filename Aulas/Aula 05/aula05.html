@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 05 - Leitura e Análise de Requisitos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 90%;
+    --slide-title-max: 70%;
+    
+    /* Callout Colors */
+    --callout-blue-bg: #e3f2fd;
+    --callout-blue-border: #2196f3;
+    --callout-green-bg: #e8f5e9;
+    --callout-green-border: #4caf50;
+    --callout-red-bg: #ffebee;
+    --callout-red-border: #f44336;
+    --callout-yellow-bg: #fffde7;
+    --callout-yellow-border: #ffeb3b;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-bar {
+    height: 60px;
+    background: var(--surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+  }
+
+  .nav-bar button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--surface);
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .nav-bar button:disabled {
+    background: var(--border);
+    cursor: not-allowed;
+  }
+  .nav-bar button:hover:not(:disabled) {
+    background: var(--accent2);
+  }
+
+  #slide-counter { font-weight: bold; color: var(--ink-light); }
+
+  .progress-container {
+    height: 6px;
+    background: var(--border);
+    width: 100%;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  #presentation {
+    flex: 1;
+    position: relative;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: 1000px;
+    background: var(--surface);
+    padding: 50px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    animation: fadeIn 0.4s ease forwards;
+  }
+  .slide.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-label {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 20px;
+    border: 1px solid var(--tag-border);
+  }
+
+  h1 { font-family: 'Montserrat', sans-serif; font-size: 42px; color: var(--ink); margin-bottom: 20px; line-height: 1.2; }
+  h2 { font-family: 'Montserrat', sans-serif; font-size: 32px; color: var(--accent); margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+  h3 { font-family: 'Montserrat', sans-serif; font-size: 24px; color: var(--ink-light); margin-bottom: 15px; margin-top: 30px; }
+  p { font-size: 20px; line-height: 1.6; margin-bottom: 15px; color: #333; }
+  strong { color: var(--ink); }
+
+  ul, ol { margin-left: 30px; margin-bottom: 20px; font-size: 20px; line-height: 1.6; }
+  li { margin-bottom: 10px; }
+
+  /* Elementos Específicos */
+  .cover-desc { font-size: 22px; color: #444; margin-bottom: 30px; }
+  .divider { border: 0; height: 1px; background: var(--border); margin: 30px 0; }
+  
+  .topics-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+  .topic-chip { background: var(--bg); padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid var(--border); }
+  
+  .cover-meta { margin-top: 40px; font-size: 16px; color: #666; text-align: right; }
+
+  .section-header { text-align: center; padding: 60px 20px; }
+  .section-num { font-family: 'Montserrat', sans-serif; font-size: 80px; font-weight: 900; color: var(--border); opacity: 0.5; margin-bottom: -20px; }
+  .section-header h2 { border: none; font-size: 48px; color: var(--ink); }
+
+  .callout { padding: 20px; border-left: 6px solid; border-radius: 0 8px 8px 0; margin-bottom: 20px; }
+  .callout-title { font-weight: bold; font-family: 'Montserrat', sans-serif; margin-bottom: 10px; font-size: 20px; }
+  
+  .callout.blue { background: var(--callout-blue-bg); border-color: var(--callout-blue-border); }
+  .callout.blue .callout-title { color: var(--callout-blue-border); }
+  
+  .callout.green { background: var(--callout-green-bg); border-color: var(--callout-green-border); }
+  .callout.green .callout-title { color: var(--callout-green-border); }
+  
+  .callout.red { background: var(--callout-red-bg); border-color: var(--callout-red-border); }
+  .callout.red .callout-title { color: var(--callout-red-border); }
+  
+  .callout.yellow { background: var(--callout-yellow-bg); border-color: #fbc02d; }
+  .callout.yellow .callout-title { color: #f57f17; }
+
+  .two-col { display: flex; gap: 20px; margin-bottom: 20px; }
+  .col-card { flex: 1; background: var(--bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+
+  .code-block { background: #1e1e1e; color: #d4d4d4; font-family: 'Source Code Pro', monospace; padding: 20px; border-radius: 8px; overflow-x: auto; margin-bottom: 20px; font-size: 18px; line-height: 1.5; white-space: pre; }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid var(--border); padding: 12px 15px; text-align: left; font-size: 18px; }
+  th { background: var(--ink); color: white; font-family: 'Montserrat', sans-serif; }
+  tr:nth-child(even) { background: var(--bg); }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 1</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+<div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+
+<div id="presentation">
+
+  <div class="slide active">
+    <div class="slide-label">Aula 05</div>
+    <h1>Aula 05 - Leitura e Análise de Requisitos</h1>
+    <p class="cover-desc">
+      Descrição: Análise crítica de documentos e histórias de usuário para garantir a testabilidade. O papel do Analista de Testes/QA não começa quando o código está pronto, mas sim na análise do que precisa ser construído, atuando de forma preventiva na mitigação de ambiguidades.
+    </p>
+    <hr class="divider">
+    <h3>Entregas da aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Requisitos funcionais e não funcionais</div>
+      <div class="topic-chip">Critérios de aceitação</div>
+      <div class="topic-chip">User Stories com sintaxe BDD (Gherkin)</div>
+      <div class="topic-chip">Identificação de ambiguidades</div>
+    </div>
+    <div class="cover-meta">
+      <span>Entregas da aula: Compreensão sólida sobre requisitos funcionais e não funcionais, elaboração de critérios de aceitação, modelagem de User Stories com sintaxe BDD (Gherkin) e técnicas de identificação de ambiguidades.</span>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>1. Abertura (Contexto da aula)</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Contexto</div>
+    <h2>Abertura</h2>
+    <p>Nas aulas anteriores, estruturamos nossa mentalidade de qualidade e compreendemos o papel estratégico do QA.</p>
+    <p>Agora, vamos aplicar a etapa de Shift-Left Testing (testar desde o início).</p>
+    <p>Na nossa SA, vocês estão desenvolvendo uma solução digital inovadora.</p>
+    <div class="callout red">
+      <div class="callout-title">Reflexão</div>
+      <p>Mas como garantir que o que o cliente pediu é exatamente o que o desenvolvedor vai programar?</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Contexto</div>
+    <h2>A Importância da Análise</h2>
+    <p>A resposta está na Leitura e Análise de Requisitos. Se um requisito for mal escrito ou ambiguo, o desenvolvedor codificará um erro, o QA testará o erro, e o produto final será um fracasso no mercado.</p>
+    <p>Hoje, vamos aprender a dissecar as histórias de usuário, separar o que o sistema deve fazer do como deve se comportar, e escrever testes automatizados usando a linguagem BDD (Behavior Driven Development) antes mesmo da primeira linha de código fonte ser redigida.</p>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>2. Conceitos Fundamentais e Base Técnica</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Conceito 1</div>
+    <h2>Conceito 1: Identificação de Requisitos Funcionais e Não Funcionais</h2>
+    <div class="callout red">
+      <div class="callout-title">A. Pergunta:</div>
+      <p>Se o botão de "Transferir Aporte" da nossa plataforma da feira de investidores funciona, mas demora 20 minutos para processar, o sistema está correto ou com defeito?</p>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real:</div>
+      <p>Durante a feira, o estande principal recebe 500 acessos simultâneos no aplicativo para votação de uma startup. O sistema permite o voto (Funcionalidade OK), mas o servidor cai devido ao volume de requisições (Não Funcional falhou). Os investidores perdem a confiança e desistem do aporte.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica:</h2>
+    <p>A engenharia de requisitos divide as necessidades do cliente em duas grandes categorias para facilitar a construção e o teste do software.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <h3>Requisitos Funcionais (RF)</h3>
+        <p>Os Requisitos Funcionais (RF) descrevem o que o sistema deve fazer de forma objetiva, ou seja, suas ações, comportamentos e regras de negócio diretas. Eles são o coração do software, representando as funcionalidades que o usuário final utilizará, como cadastrar uma conta, efetuar um login ou gerar um relatório de investimentos. Se um RF não é atendido, o sistema simplesmente não realiza sua função principal.</p>
+      </div>
+      <div class="col-card">
+        <h3>Requisitos Não Funcionais (RNF)</h3>
+        <p>Por outro lado, os Requisitos Não Funcionais (RNF) definem os atributos de qualidade do sistema, estipulando como o sistema deve realizar essas funções. Eles englobam aspectos cruciais como desempenho, segurança, usabilidade, escalabilidade e portabilidade.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica (cont.):</h2>
+    <p>Um sistema pode ter todos os seus requisitos funcionais perfeitamente implementados, mas se for extremamente lento, vulnerável a ataques de hackers ou impossível de usar em dispositivos móveis, ele será considerado um produto de baixa qualidade e rejeitado pelo mercado.</p>
+    <p>Compreender essa separação é a base do trabalho de um QA de alta performance. Ao analisar a documentação de um projeto, o profissional de qualidade deve mapear imediatamente testes que validem as ações do usuário (caixa-preta funcional) e testes que estressem a arquitetura do sistema (testes de carga, stress e segurança).</p>
+    <p>A negligência dos RNFs é uma das principais causas de falhas catastróficas em lançamentos de grandes plataformas digitais, gerando prejuízos milionários.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Técnica</div>
+    <h2>D. Explicação técnica:</h2>
+    <p>Segundo as normativas de qualidade (como a ISO/IEC 25010), a qualidade do produto é avaliada tanto por sua adequação funcional quanto por características de performance e segurança.</p>
+    <p>Requisitos Funcionais são testados através de fluxos de entrada e saída.</p>
+    <p>Requisitos Não Funcionais exigem ferramentas específicas (como JMeter para performance ou OWASP ZAP para segurança) e devem possuir métricas claras e quantificáveis na documentação (ex: "tempo de resposta < 200ms").</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Código</div>
+    <h2>E. Exemplo de Código:</h2>
+    <p>Embora requisitos sejam muitas vezes textuais, no desenvolvimento moderno eles se traduzem em validações e testes automatizados. Abaixo, um exemplo de script Cypress que valida um RF (Login) e um RNF (Tempo de Resposta).</p>
+    <div class="code-block">JavaScript
+describe('Validação de Requisitos - Feira de Investidores', () => {
+  // Teste de Requisito Funcional (RF)
+  it('Deve permitir o login com credenciais válidas', () => {
+    cy.visit('/login');
+    cy.get('#email').type('investidor@senai.br');
+    cy.get('#password').type('SenhaForte123');
+    cy.get('#btn-entrar').click();
+    cy.url().should('include', '/dashboard'); // Valida a ação
+  });
+
+  // Teste de Requisito Não Funcional (RNF) - Performance
+  it('O carregamento do dashboard deve ocorrer em menos de 2 segundos', () => {
+    cy.request('/api/dashboard/data').then((response) => {
+      expect(response.status).to.eq(200);
+      // Valida o tempo de resposta estipulado no RNF
+      expect(response.duration).to.be.lessThan(2000);
+    });
+  });
+});</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Prática</div>
+    <h2>F. Estudo de Caso & G. Exercícios</h2>
+    <div class="callout blue">
+      <div class="callout-title">F. Estudo de Caso:</div>
+      <p>Pense na construção de um carro de Fórmula 1. O Requisito Funcional dita que o carro deve acelerar, frear e virar para a esquerda e direita. O Requisito Não Funcional exige que o carro acelere de 0 a 100 km/h em menos de 2.5 segundos, suporte colisões frontais severas e tenha um volante ergonômico. Se o carro freia, mas o freio quebra após 3 voltas (baixa confiabilidade - RNF), o piloto sofre um acidente.</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">G. Exercícios:</div>
+      <p>1. Classifique a seguinte frase: "O sistema deve enviar um e-mail de confirmação de aporte." (RF ou RNF?).</p>
+      <p>2. Classifique a seguinte frase: "O sistema de votação deve suportar 10.000 requisições simultâneas sem degradação de performance." (RF ou RNF?).</p>
+      <p>3. Escreva um RF e um RNF para a funcionalidade de "Cadastro de Startup" na plataforma da feira.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Conceito 2</div>
+    <h2>Conceito 2: Definição e Importância dos Critérios de Aceitação</h2>
+    <div class="callout red">
+      <div class="callout-title">A. Pergunta:</div>
+      <p>Como o Desenvolvedor, o QA e o Cliente entram em um acordo unânime de que uma funcionalidade está, de fato, 100% pronta para ir ao ar?</p>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real:</div>
+      <p>Um dev recebe a tarefa "Criar tela de cadastro". Ele cria uma tela com nome e e-mail e envia para produção. O cliente reclama que faltou o campo CPF e a foto de perfil. O desenvolvedor diz: "Você não colocou isso no pedido". Resultado: retrabalho, perda de prazo e conflito na equipe.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica:</h2>
+    <p>Critérios de Aceitação são condições específicas, testáveis e claras que uma funcionalidade (ou User Story) deve satisfazer para ser considerada concluída e aceita pelo cliente ou Product Owner. Eles funcionam como um "contrato" detalhado do que é esperado, eliminando suposições da equipe técnica. Sem esses critérios, o desenvolvimento se torna um jogo de adivinhação, onde cada membro da equipe possui uma visão diferente sobre o escopo do que está sendo construído.</p>
+    <p>A importância desses critérios reside na criação de uma barreira de qualidade padronizada (a famosa "Definition of Done" - DoD). Para o desenvolvedor, os critérios de aceitação delimitam o fim do seu trabalho; ele sabe exatamente quais validações o seu código precisará passar.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica (cont.):</h2>
+    <p>Para o QA, esses critérios são a matéria-prima direta para a criação dos casos de teste. Se um critério exige que "a senha deve conter 8 caracteres, incluindo um número", o QA criará testes positivos e negativos exatamente para essa regra.</p>
+    <p>Além de alinhar expectativas, bons critérios de aceitação focam na perspectiva do usuário e no valor de negócio entregue. Eles previnem o temido "scope creep" (aumento descontrolado do escopo durante a execução) e garantem que o time não entregue nem a mais, nem a menos do que foi requisitado. Ao adotar critérios rigorosos, a equipe eleva o nível de profissionalismo e reduz drasticamente as falhas encontradas nas etapas finais do projeto.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Técnica</div>
+    <h2>D. Explicação técnica & E. Exemplo</h2>
+    <p>Na metodologia Ágil (Scrum/Kanban), Critério de Aceitação deve ser binário: ou passou ou falhou. Não existe "quase pronto". Eles devem cobrir os cenários de sucesso ("Caminho Feliz"), os cenários de erro ("Caminhos Alternativos") e as restrições de regras de negócio.</p>
+    <p><strong>E. Exemplo de Código/Estrutura:</strong></p>
+    <p>User Story: Como investidor, desejo redefinir minha senha esquecida para recuperar o acesso à plataforma.</p>
+    <p>Critérios de Aceitação documentados no Jira/Trello:</p>
+    <div class="code-block">Plaintext
+CA01 - O usuário deve receber um e-mail com um link de redefinição de uso único.
+CA02 - O link gerado deve expirar automaticamente em 15 minutos.
+CA03 - A nova senha deve ter no mínimo 8 caracteres, 1 maiúscula e 1 caractere especial (!@#$).
+CA04 - Se a nova senha for igual à anterior, o sistema deve exibir a mensagem de erro: "A senha não pode ser igual à atual".</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Prática</div>
+    <h2>F. Estudo de Caso & G. Exercícios</h2>
+    <div class="callout blue">
+      <div class="callout-title">F. Estudo de Caso:</div>
+      <p>Imagine pedir uma "Pizza de Calabresa" (User Story). Sem critérios de aceitação, você pode receber uma pizza com cebola, massa grossa e borda recheada, e o pizzaiolo dirá que atendeu ao pedido. Com os Critérios de Aceitação ("sem cebola", "massa fina", "borda simples"), o contrato fica explícito e testável na hora da entrega.</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">G. Exercícios:</div>
+      <p>1. Leia a User Story: "Como organizador da feira, desejo exportar a lista de inscritos". Crie 3 Critérios de Aceitação para esta história.</p>
+      <p>2. Explique com suas palavras por que um Critério de Aceitação deve ser "binário" (passou/falhou).</p>
+      <p>3. Identifique o erro no seguinte critério: "A tela deve ser bonita e carregar rápido". Reescreva-o corretamente.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Conceito 3</div>
+    <h2>Conceito 3: User Stories e Escrita em Formato BDD (Behavior Driven Development)</h2>
+    <div class="callout red">
+      <div class="callout-title">A. Pergunta:</div>
+      <p>Como podemos escrever requisitos de forma que o Cliente entenda, o QA consiga testar e o computador consiga executar automaticamente?</p>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real:</div>
+      <p>A equipe de negócios escreve um PDF de 200 páginas que os desenvolvedores não leem. Os devs escrevem um código que a área de negócios não compreende. A solução BDD surge para criar uma "Linguagem Ubíqua" (comum a todos), conectando o texto em português direto a um script de automação.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica:</h2>
+    <p>As Histórias de Usuário (User Stories) são descrições curtas e simples de uma funcionalidade, contadas a partir da perspectiva de quem deseja a nova capacidade (geralmente um usuário ou cliente). Elas seguem o padrão "Como [persona], eu quero [ação] para que [benefício]". No entanto, apenas a história não é suficiente para a execução técnica.</p>
+    <p>É aqui que entra o BDD (Behavior Driven Development), ou Desenvolvimento Orientado a Comportamento, uma abordagem que aproxima a área de negócios e a área técnica através de uma linguagem estruturada. O formato BDD utiliza uma sintaxe universal chamada Gherkin, composta pelas palavras-chave "Dado (Given)", "Quando (When)" e "Então (Then)". Essa estrutura força a equipe a pensar em pré-condições, ações e resultados esperados de maneira estrita.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica (cont.):</h2>
+    <p>O "Dado" estabelece o contexto inicial do sistema. O "Quando" representa a ação executada pelo usuário. O "Então" consolida a validação do resultado que deve ser observado. Essa clareza absoluta erradica falhas de interpretação e guia o desenvolvimento orientado diretamente às necessidades do usuário.</p>
+    <p>A maior vantagem do BDD no contexto moderno de Testes de Software é que a sintaxe Gherkin pode ser lida por frameworks de automação de testes, como o Cucumber. Isso significa que a especificação de negócio se torna um documento vivo e executável. Quando o QA escreve um cenário em BDD, ele está simultaneamente documentando o sistema, criando um roteiro de teste manual e gerando a estrutura base para o código de automação. Isso unifica a qualidade em todas as etapas do ciclo de vida do software.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Técnica e Código</div>
+    <h2>D. Explicação técnica & E. Exemplo</h2>
+    <p>O BDD foca no comportamento do sistema e não na sua implementação interna (Caixa-Preta). O framework Cucumber processa o arquivo de texto feature escrito em Gherkin e mapeia cada linha (step) para uma função (Step Definition) na linguagem de programação (Java, Python, JS).</p>
+    <p><strong>E. Exemplo de Código: Arquivo login_investidor.feature (Escrito pelo QA/PO)</strong></p>
+    <div class="code-block">Gherkin
+Funcionalidade: Autenticação de Investidores
+
+Cenário: Login bem sucedido com credenciais válidas
+Dado que o investidor está na página de login da feira
+Quando ele insere o e-mail "investidor@teste.com" e a senha "Senha123"
+ E clica no botão "Entrar"
+Então ele deve ser redirecionado para a tela do "Dashboard de Aportes"
+ E uma mensagem de "Bem-vindo" deve ser exibida
+
+Cenário: Tentativa de login com conta bloqueada
+Dado que o investidor errou a senha 5 vezes consecutivas
+Quando ele tentar realizar o login novamente
+Então o sistema deve exibir a mensagem "Conta bloqueada por segurança"</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Prática</div>
+    <h2>F. Estudo de Caso & G. Exercícios</h2>
+    <div class="callout blue">
+      <div class="callout-title">F. Estudo de Caso:</div>
+      <p>Pense no BDD como a receita de um bolo padronizada para uma máquina fabril. "Dado" que tenho farinha e ovos na mesa (estado inicial). "Quando" bato tudo por 5 minutos a 200 graus (ação). "Então" obtenho um bolo fofinho (validação do resultado).</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">G. Exercícios:</div>
+      <p>1. Transforme o cenário "Sacar R$ 100 do caixa eletrônico com saldo positivo" para o formato BDD (Dado, Quando, Então).</p>
+      <p>2. Para que serve a palavra-chave "E" (And) dentro da estrutura Gherkin?</p>
+      <p>3. Crie um cenário BDD negativo (falha) para a funcionalidade de "Comprar ingresso da feira com cartão de crédito vencido".</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Conceito 4</div>
+    <h2>Conceito 4: Como identificar e mitigar a ambiguidade em requisitos</h2>
+    <div class="callout red">
+      <div class="callout-title">A. Pergunta:</div>
+      <p>O que acontece quando o cliente pede um sistema "rápido" e "fácil de usar"? O que é rápido para você é rápido para mim?</p>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real:</div>
+      <p>Um contrato estabelece que o sistema deve "suportar muitos usuários". O Desenvolvedor entrega um sistema que suporta 50 pessoas. O cliente esperava 5.000. O projeto vai parar na justiça por que a palavra "muitos" é ambígua.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica:</h2>
+    <p>A ambiguidade é a maior inimiga da engenharia de qualidade. Um requisito é considerado ambiguo quando permite duas ou mais interpretações diferentes, dependendo de quem o lê. Palavras como "rápido", "robusto", "amigável", "aproximadamente", "muitos" e "adequado" são adjetivos subjetivos que não possuem métricas testáveis. O papel do QA na fase de Análise de Requisitos é atuar como um "detetive", caçando essas palavras no documento e exigindo quantificações exatas da equipe de Produto ou do Cliente antes do desenvolvimento iniciar.</p>
+    <p>A mitigação da ambiguidade requer a aplicação da técnica de questionamento investigativo (5 Porquês, ou detalhamento de contexto). Se o documento diz que o sistema deve ser "seguro", o Analista de Testes deve questionar: "Seguro sob qual norma? Estamos falando de criptografia AES-256? Proteção contra SQL Injection?". Transformar o qualitativo no quantitativo é o processo de refatoração do requisito.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Explicação</div>
+    <h2>C. Explicação teórica (cont.):</h2>
+    <p>Sem isso, a criação do Plano de Teste torna-se baseada em achismos, o que invariavelmente resultará na aprovação de defeitos ou em falsos positivos durante a execução. A prática de varrer ambiguidades é o cerne do Shift-Left Testing, que aprendemos nas aulas introdutórias. Descobrir e corrigir um erro de interpretação no papel custa quase zero reais à empresa. Descobrir esse mesmo erro após o desenvolvedor ter gasto duas semanas programando a arquitetura errada custa milhares de reais. Portanto, o QA que domina a leitura crítica de requisitos agrega um valor financeiro incomensurável ao projeto, poupando a equipe de refatorações desgastantes.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Técnica</div>
+    <h2>D. Explicação técnica:</h2>
+    <p>Requisitos testáveis devem seguir as heurísticas SMART:</p>
+    <ul>
+      <li>Specific (Específico),</li>
+      <li>Measurable (Mensurável),</li>
+      <li>Achievable (Atingível),</li>
+      <li>Relevant (Relevante) e</li>
+      <li>Time-bound (Temporal).</li>
+    </ul>
+    <p>Uma ferramenta prática é fazer o "Teste da Automação": Se eu não consigo transformar essa frase em um script de assert (validação lógica em código), o requisito está ambíguo.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Código</div>
+    <h2>E. Exemplo de Código/Análise:</h2>
+    <p>Requisito Original (Ambiguo): O sistema deve processar os pagamentos rapidamente.</p>
+    <p>Refatoração (Mitigado e Testável): O sistema deve processar e confirmar os pagamentos via PIX em um tempo máximo de 3 segundos em 95% das transações diárias.</p>
+    <div class="code-block">Python
+# Como o requisito mitigado permite a criação de um teste real em Python
+import time
+import requests
+
+def test_tempo_processamento_pix():
+    start_time = time.time()
+    response = requests.post("/api/pagamento/pix", data={"valor": 1000})
+    end_time = time.time()
+    tempo_decorrido = end_time - start_time
+    
+    assert response.status_code == 200, "Falha no pagamento"
+    assert tempo_decorrido <= 3.0, f"Performance inaceitável: demorou {tempo_decorrido}s"</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Prática</div>
+    <h2>F. Estudo de Caso & G. Exercícios</h2>
+    <div class="callout blue">
+      <div class="callout-title">F. Estudo de Caso:</div>
+      <p>Contratar um construtor dizendo "Faça uma casa grande". Ele entrega uma casa de 80m² (para ele, grande). Você queria 300m². A mitigação seria: "Construa uma casa com exatos 300m² de área construída, 4 quartos de 15m² cada".</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">G. Exercícios:</div>
+      <p>1. Identifique a palavra ambígua nesta frase: "A interface de usuário deve ser moderna de acordo com o mercado."</p>
+      <p>2. Refatore o seguinte requisito ambiguo para um formato testável: "O aplicativo deve ocupar pouco espaço no celular."</p>
+      <p>3. Por que a ambiguidade impede a automação de testes? Explique.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>3. FAQ - Dúvidas Reais</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Dúvidas Frequentes</div>
+    <h2>Dúvidas Reais (Parte 1)</h2>
+    <ul>
+      <li><strong>1. A responsabilidade de escrever User Stories e Critérios de Aceitação é apenas do QA?</strong><br>
+      Resposta: Não. Geralmente, quem escreve é o Product Owner (PO) ou Analista de Negócios. O papel do QA é revisar, criticar, apontar ambiguidades e sugerir cenários de borda (exceções) que o PO possa ter esquecido de incluir na história.</li>
+      <li><strong>2. Posso usar BDD (Gherkin) para Requisitos Não Funcionais?</strong><br>
+      Resposta: Sim. Embora seja mais focado em fluxos funcionais, você pode criar cenários BDD para performance. Exemplo: "Dado que 1000 usuários acessam a home / Quando carregam a página / Então o tempo de resposta deve ser inferior a 2 segundos".</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Dúvidas Frequentes</div>
+    <h2>Dúvidas Reais (Parte 2)</h2>
+    <ul>
+      <li><strong>3. O que acontece se a equipe não definir Critérios de Aceitação antes de começar a programar?</strong><br>
+      Resposta: O desenvolvedor usará o seu próprio "viés de confirmação" para decidir quando o trabalho terminou. Isso leva a funcionalidades incompletas, regras de negócio não validadas e constantes idas e vindas de bugs entre a equipe de desenvolvimento e teste (retrabalho alto).</li>
+      <li><strong>4. É obrigatório automatizar todo cenário escrito em BDD?</strong><br>
+      Resposta: Não. O BDD serve primeiramente para comunicação e clareza de negócio. Muitos cenários escritos em Gherkin são utilizados apenas como roteiros rigorosos para testes manuais exploratórios, dependendo da estratégia de automação da empresa.</li>
+      <li><strong>5. Qual a diferença entre um Requisito Funcional e uma Regra de Negócio?</strong><br>
+      Resposta: O Requisito Funcional é a ação em si (Ex: "O sistema deve calcular o juros da parcela"). A Regra de Negócio é a matemática/lei corporativa por trás dessa ação (Ex: "O juros deve ser de 2% ao mês em atrasos"). O sistema operacionaliza a regra.</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>4. Atividade Prática Guiada</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Mão na Massa</div>
+    <h2>Atividade Prática Guiada (Contexto)</h2>
+    <div class="callout blue">
+      <div class="callout-title">Contexto do problema:</div>
+      <p>Na plataforma da nossa "Feira de Investidores", precisamos desenvolver o módulo de Pesquisa de Startups.</p>
+      <p>O documento original enviado pelo cliente diz:</p>
+      <p>"O investidor deve conseguir buscar startups facilmente na página inicial. Se não achar nada, avise-o. O sistema tem que ser rápido."</p>
+    </div>
+    <p><strong>Requisitos da Atividade:</strong></p>
+    <p>Vamos refatorar essa história ambígua, separar RF de RNF, criar critérios de aceitação e traduzir o caminho feliz para BDD.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Passo a Passo</div>
+    <h2>Passo a passo da implementação prática:</h2>
+    <p>1. Análise de Ambiguidade: O professor demonstrará os problemas no texto original ("facilmente", "rápido", "avise-o").</p>
+    <p>2. Definição de RF e RNF:</p>
+    <ul>
+      <li>RF: Sistema deve ter um campo de busca por nome ou setor. Sistema deve exibir mensagem caso não haja retorno.</li>
+      <li>RNF: O tempo de retorno da busca deve ser inferior a 1 segundo. A busca deve ser responsiva (funcionar no mobile).</li>
+    </ul>
+    <p>3. Escrita da User Story estruturada: "Como [Investidor Anjo], eu quero [buscar startups por palavra-chave] para [encontrar oportunidades de aporte de meu interesse]."</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Critérios de Aceitação</div>
+    <h2>Criação dos Critérios</h2>
+    <p>4. Criação dos Critérios de Aceitação (Professor + Alunos):</p>
+    <ul>
+      <li>CA01: A busca deve aceitar letras e números, no mínimo 3 caracteres para iniciar.</li>
+      <li>CA02: O resultado deve ser exibido em formato de lista (Cards).</li>
+      <li>CA03: Se a palavra-chave não corresponder a nenhuma startup, exibir texto: "Nenhuma startup encontrada com estes termos."</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Gherkin</div>
+    <h2>Mão na massa em BDD</h2>
+    <p>5. Mão na massa em BDD (Gherkin): O professor guiará a escrita do cenário de erro no quadro/projetor.</p>
+    <p><strong>Resultado Esperado (Escrito no quadro):</strong></p>
+    <div class="code-block">Gherkin
+Funcionalidade: Busca de Startups no Catálogo
+Cenário: Busca sem resultados correspondentes
+Dado que o investidor acessou o módulo de Busca de Startups
+ Quando ele preenche o campo de pesquisa com "AgroTechX"
+ E clica na lupa de pesquisa
+Então o sistema não deve retornar nenhum Card na tela
+ E deve exibir a notificação de erro "Nenhuma startup encontrada com estes termos."</div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>5. Exercícios de Fixação</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Exercícios</div>
+    <h2>Exercícios de Fixação (1 a 3)</h2>
+    <p>Estes exercícios deverão ser resolvidos em dupla.</p>
+    <div class="callout green">
+      <p>1. O texto a seguir descreve um Requisito Funcional ou Não Funcional? "O portal de investidores deve suportar o armazenamento de senhas utilizando o padrão de criptografia SHA-256." Justifique sua resposta.</p>
+      <p>2. Refatore a frase ambígua: "A tela de exibição dos gráficos de investimento deve ser compreensível para usuários leigos." Transforme-a em um critério de aceitação mensurável e testável.</p>
+      <p>3. Crie uma User Story completa (Como... Quero... Para...) e 2 Critérios de Aceitação para a funcionalidade: "Botão de Favoritar uma Startup" no aplicativo da feira.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Exercícios</div>
+    <h2>Exercícios de Fixação (4 a 6)</h2>
+    <div class="callout green">
+      <p>4. Utilizando o formato BDD (Dado, Quando, Então), crie um cenário validando o Caminho Feliz (sucesso) da User Story que você criou na questão 3 (Favoritar Startup).</p>
+      <p>5. Utilizando o formato BDD, crie um cenário validando um Fluxo de Exceção/Erro para o sistema de Votação (Ex: Investidor tentando votar duas vezes na mesma startup).</p>
+    </div>
+    <p>6. Analise o seguinte cenário BDD feito por um desenvolvedor júnior. Encontre 2 erros conceituais e os corrija:</p>
+    <div class="code-block">Dado que o sistema é rápido
+Quando o usuário quer fazer login
+Então o banco de dados SQL atualiza a tabela XYZ e a tela fica bonita.</div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>6. Conexão com o Curso e Próximos Passos</h2>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Integração</div>
+    <h2>Conexão com a SA e Próximos Passos</h2>
+    <p>Conexão com a SA: Tudo o que fizemos hoje é a planta-baixa da solução que nossa Empresa vai desenvolver. Sem requisitos claros, o código que vocês produzirão nas próximas fases será falho.</p>
+    <p>Vocês aplicarão o formato BDD e a divisão de RF/RNF na criação do Plano de Teste e Roteiro de Testes oficial do projeto (Documentos avaliativos da SA). O Gherkin será a base dos testes automatizados que rodaremos nos nossos módulos.</p>
+    <div class="callout blue">
+      <div class="callout-title">Na Próxima Aula:</div>
+      <p>Vamos trabalhar na Elaboração do Plano de Teste, vamos pegar todas as User Stories e Critérios de Aceitação que aprendemos a mapear hoje e empacotá-las em um documento formal. Vamos definir estratégias: O que testar? O que NÃO testar? Quem testará? Como aprovaremos o sistema final?</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('presentation').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', e => {
+    if (e.changedTouches[0].screenX < touchX - 50) changeSlide(1);
+    if (e.changedTouches[0].screenX > touchX + 50) changeSlide(-1);
+  });
+
+  // Init
+  showSlide(0);
+</script>
+</body>
+</html>
