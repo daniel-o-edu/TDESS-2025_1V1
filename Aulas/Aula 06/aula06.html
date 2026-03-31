@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 06 - Planejamento e Plano de Testes</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 100%;
+    --slide-title-max: 90%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── IMAGENS DE FUNDO ── */
+  .slide-cover {
+    background-image: url('https://i.ibb.co/fzwwYWW6/img-frente01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://i.ibb.co/1tBjw9p9/img-tit01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.80);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-image: url('https://i.ibb.co/m1J6vPd/img-frente02.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-common::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.88);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-common > * { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDES GENÉRICOS ── */
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(1.5rem, 2vw, 1.5rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(1.5rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(1.7rem, 2vw, 1.5rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #dceefb;
+    border-left: 4px solid var(--accent2);
+    color: var(--ink);
+  }
+  .callout.green {
+    background: #e1f5e8;
+    border-left: 4px solid #2e7d32;
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #e3f0fb;
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
+  }
+  .callout.yellow {
+    background: #e8f4fd;
+    border-left: 4px solid var(--accent3);
+    color: var(--ink);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(1.5rem, 1.8vw, 1.5rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #d0e8f8; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 2vw, 1.5rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(2.5rem, 1.9vw, 1.5rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+    font-family: 'Source Code Pro', monospace;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin: 0; }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Qualidade de Software</div>
+    <h1>Aula 06 - Planejamento e Plano de Testes</h1>
+    <p class="cover-desc">Descrição: Construção do plano de testes e definição detalhada do roteiro para execução, garantindo a cobertura das especificações técnicas.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">O Guia Estratégico</div>
+      <div class="topic-chip">Componentes do Plano</div>
+      <div class="topic-chip">Roteiro de Execução</div>
+      <div class="topic-chip">Pirâmide de Automação</div>
+      <div class="topic-chip">Shift-Left Testing</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 06</span>
+      <span>Testes</span>
+      <span>Planejamento</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real</h2>
+    <p>Imagine que uma grande startup de delivery lançou uma nova funcionalidade de pagamento via PIX dividido entre amigos no meio de uma sexta-feira à noite.</p>
+    <p>Por conta da pressa, a equipe técnica não documentou o que precisava ser validado, como o limite de transações ou falhas de rede.</p>
+    <p>O resultado? O aplicativo cobrou o dobro de todos os usuários e os servidores caíram.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>A Alma do VV&T</h2>
+    <p>No mercado de tecnologia corporativa, a etapa de planejamento estratégico não é apenas uma formalidade burocrática, mas a "alma" das atividades de Verificação, Validação e Teste (VV&T).</p>
+    <p>Planejar evita o caos, alinhando tempo, pessoas e ferramentas para mitigar riscos financeiros e de reputação da marca.</p>
+    <div class="callout yellow">
+      <div class="callout-title">Pergunta</div>
+      Se vocês fossem construir uma casa do zero, começariam levantando as paredes de forma improvisada ou fariam uma planta detalhada primeiro? Então, por que no desenvolvimento de software nós frequentemente caímos na tentação de "sair testando" sem um mapa para nos guiar?
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>O Guia Estratégico</h2>
+      <p>Componentes do Plano de Teste</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>A. Conceito: O Planejamento Estratégico</h2>
+    <p>O planejamento estratégico de testes é o uma ferramenta de gerenciamento de incertezas que transforma recursos finitos (tempo, equipe e custo) em eficiência.</p>
+    <p>Seu objetivo principal é detectar o máximo de defeitos críticos com o menor investimento possível.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>Os Pilares do Planejamento</h2>
+    <ul>
+      <li><strong>Gestão de Expectativas:</strong> Define-se o que será testado (Escopo Positivo) e o que não será (Escopo Negativo) para evitar retrabalho e alinhar a visão dos gestores.</li>
+      <li><strong>Tomada de Decisão:</strong> Utiliza os Critérios de Conclusão (metas de sucesso) e Critérios de Parada (interrupções por riscos) para determinar o momento exato da liberação, evitando testes infinitos e desperdício de orçamento.</li>
+      <li><strong>Documento Vivo:</strong> Atua como um "contrato" técnico que organiza as fases do ciclo de vida do software, mas que exige revisões constantes para acompanhar as mudanças de requisitos.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>Estratégia e Segurança</h2>
+    <p>Em uma frase: O plano de testes não é apenas burocracia, mas uma estratégia para garantir que o software só avance quando estiver maduro, tratando a qualidade como um processo mensurável e seguro.</p>
+    <p>Já um Plano de Testes é o documento mestre que orienta toda a estratégia de garantia de qualidade (QA).</p>
+    <p>De acordo com padrões internacionais (como o IEEE 829 ou a ISO/IEC/IEEE 29119), ele não é apenas uma lista de tarefas, mas um roteiro de "como, quem, quando e onde".</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Componentes do Plano de Teste</div>
+    <h2>Visão Geral e Escopo</h2>
+    <p>Aqui estão os componentes essenciais que não podem faltar em um bom plano:</p>
+    <ul>
+      <li><strong>1. Visão Geral e Identificação</strong>
+        <ul>
+          <li><strong>Identificador do Plano:</strong> Um código ou nome único para controle de versão.</li>
+          <li><strong>Introdução:</strong> Resumo do projeto e o que se pretende testar.</li>
+          <li><strong>Referências:</strong> Documentos de requisitos, especificações de design ou manuais que serviram de base.</li>
+        </ul>
+      </li>
+      <li><strong>2. Escopo (O que será testado?)</strong>
+        <ul>
+          <li><strong>Itens de Teste:</strong> Quais módulos, funcionalidades ou sistemas serão validados.</li>
+          <li><strong>Funcionalidades a serem testadas:</strong> O foco principal (ex: login, checkout, integração com API).</li>
+          <li><strong>Funcionalidades NÃO testadas:</strong> Crucial para alinhar expectativas. Ex: "Não testaremos a performance do banco de dados neste ciclo".</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Componentes do Plano de Teste</div>
+    <h2>Estratégia e Critérios</h2>
+    <ul>
+      <li><strong>3. Estratégia e Metodologia</strong>
+        <ul>
+          <li><strong>Níveis de Teste:</strong> Unitário, Integração, Sistema ou Aceitação (UAT).</li>
+          <li><strong>Tipos de Teste:</strong> Funcionais, Não-funcionais (Segurança, Performance, Usabilidade).</li>
+          <li><strong>Ferramentas:</strong> Softwares que serão usados (Jira, Selenium, Postman, JMeter).</li>
+        </ul>
+      </li>
+      <li><strong>4. Critérios de Entrada, Saída e Parada</strong>
+        <p>Como discutimos antes, aqui você define as "regras do jogo":</p>
+        <ul>
+          <li><strong>Entrada:</strong> O que é preciso para começar? (ex: Ambiente de homologação disponível).</li>
+          <li><strong>Conclusão (Saída):</strong> Quando consideramos pronto? (ex: 100% dos casos críticos aprovados).</li>
+          <li><strong>Interrupção (Parada):</strong> Quando pausamos os testes? (ex: Sistema caiu e não volta em 2h).</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Componentes do Plano de Teste</div>
+    <h2>Logística, Riscos e Cronograma</h2>
+    <ul>
+      <li><strong>5. Logística e Recursos</strong>
+        <ul>
+          <li><strong>Entregáveis:</strong> Relatórios de bugs, sumário de testes, métricas.</li>
+          <li><strong>Ambiente de Teste:</strong> Hardware, software e dados de teste necessários.</li>
+          <li><strong>Equipe e Responsabilidades:</strong> Quem executa, quem revisa e quem aprova.</li>
+        </ul>
+      </li>
+      <li><strong>6. Riscos e Contingências</strong>
+        <ul>
+          <li>Identificação de riscos que podem atrasar os testes (ex: atraso na entrega do código, falta de pessoal) e o que fazer se eles ocorrerem.</li>
+        </ul>
+      </li>
+      <li><strong>7. Cronograma</strong>
+        <ul>
+          <li>Datas das principais milhas (milestones), períodos de execução e prazos para o relatório final.</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Componentes do Plano de Teste</div>
+    <h2>Tabela para Consulta Rápida</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Responde a pergunta...</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Escopo</strong></td>
+            <td>O que vamos (e o que não vamos) testar?</td>
+          </tr>
+          <tr>
+            <td><strong>Critérios</strong></td>
+            <td>Quando começamos, paramos e terminamos?</td>
+          </tr>
+          <tr>
+            <td><strong>Recursos</strong></td>
+            <td>Quem vai testar e em qual máquina/celular?</td>
+          </tr>
+          <tr>
+            <td><strong>Riscos</strong></td>
+            <td>O que pode dar errado no processo de QA?</td>
+          </tr>
+          <tr>
+            <td><strong>Entregáveis</strong></td>
+            <td>Qual documento o cliente vai receber no final?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>B. Explicação didática: Analogia do Acampamento</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia</div>
+      Pensem no Plano de Testes como a lista e as regras de um acampamento com a turma. O Escopo é dizer: "Nós vamos explorar a trilha da cachoeira (Escopo Positivo), mas não vamos entrar na caverna escura (Escopo Negativo)".
+    </div>
+    <p>Os Objetivos são o que queremos lá: "Tirar boas fotos e não nos perdermos". E os Critérios de Parada? "Voltaremos para as barracas assim que começar a chover ou quando o sol se pôr".</p>
+    <p>Se não tivermos isso escrito e combinado, alguém vai se perder ou a viagem vai custar o dobro.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>C. Visualizando: Mapa Mental</h2>
+    <p>Imagine um Mapa Mental no quadro onde o círculo central diz "Plano de Teste". Dele puxamos três ramos principais.</p>
+    <p>O primeiro ramo é "Escopo" (com ícones de "Check" para o que entra e "X" vermelho para o que sai).</p>
+    <p>O segundo ramo é "Objetivos" (ícone de um alvo com requisitos do sistema).</p>
+    <p>O terceiro ramo é "Critérios de Parada" (ícone de um semáforo vermelho indicando quando o teste atinge 100% de cobertura ou acaba o tempo da sprint).</p>
+      </div>
+
+ <div class="slide slide-common">
+    <div class="slide-label">O Guia Estratégico</div>
+    <h2>C. Visualizando: Mapa Mental</h2>
+    <p>img01.png</p>
+      </div>
+
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estudo de Caso</div>
+    <h2>D. Caso para Solução: O "Imprevisto" da TechFood</h2>
+    <p><strong>O Contexto</strong></p>
+    <p>A startup TechFood contratou uma equipe para desenvolver um MVP (Mínimo Produto Viável) de um aplicativo de entregas para bairros pequenos.</p>
+    <p>O prazo era de 3 meses. Na data da entrega, o cliente enviou um e-mail furioso: "O sistema está incompleto! Não consigo gerenciar a frota própria de caminhões refrigerados e o sistema não faz o cálculo automático de impostos de importação para os insumos. Estamos parados e o projeto está atrasado."</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estudo de Caso</div>
+    <h2>O Problema TechFood</h2>
+    <p><strong>O Problema</strong></p>
+    <p>A equipe de desenvolvimento afirma que o projeto está pronto conforme o combinado. Contudo, o cliente insiste que essas funções são "óbvias" para qualquer software de logística.</p>
+    <p>Ao revisar o documento de requisitos, a equipe nota que listou tudo o que o app faz (pedidos, pagamento, rastreio simples), mas em nenhum lugar foi escrito o que ele não faz.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Atividade Prática</div>
+    <h2>Desafio do Escopo Negativo</h2>
+    <div class="callout green">
+      <div class="callout-title">Desafio</div>
+      Com base no diagnóstico de que o erro foi a falta de um Escopo Negativo, vocês devem:<br><br>
+      1. Identificar o conflito: Por que o cliente se sente no direito de cobrar funções de alta complexidade (gestão de frota pesada e tributação internacional) em um MVP local?<br>
+      2. Redigir a Cláusula de Exclusão: Escrever o parágrafo de Escopo Negativo que deveria ter constado no contrato inicial para evitar esse impasse.<br>
+      3. Plano de Mitigação: Como a equipe deve comunicar ao cliente que essas funções são "out of scope" sem perder o contrato ou a confiança?<br>
+      4. Resposta: Envie um email "Carta Resposta" para comunicar o resultado do diagnóstico.
+    </div>
+    <div class="callout red">
+      <div class="callout-title">Dica de Ouro</div>
+      O Escopo Negativo serve para "matar" a imaginação excessiva do cliente antes que ela se torne uma tarefa no seu Trello.
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Roteiro de Teste e Direcionamento de Execução</h2>
+      <p>A transição do estratégico para o operacional.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Direcionamento de Execução</div>
+    <h2>A. Conceito: O Conceito de Roteiro</h2>
+    <p>O Roteiro de Testes é o "manual de instruções" tático da qualidade de software. Se o Plano de Testes é o mapa estratégico, o roteiro é o passo a passo do GPS.</p>
+    <p>Para facilitar a visualização dessa transição do estratégico para o operacional, aqui está um detalhamento dos pontos fundamentais:</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Direcionamento de Execução</div>
+    <h2>1. Níveis de Abstração e a Pirâmide de Testes</h2>
+    <p>O roteiro atua no nível operacional, mas ele se adapta conforme o Nível do Teste. Dependendo de onde estamos olhando, o detalhamento muda:</p>
+    <ul>
+      <li><strong>Unidade:</strong> Focado em pequenos pedaços de código (funções/métodos).</li>
+      <li><strong>Integração:</strong> Focado na comunicação entre diferentes módulos.</li>
+      <li><strong>Sistema:</strong> Focado na jornada completa do usuário final (ponta a ponta).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Direcionamento de Execução</div>
+    <h2>2. A Anatomia de um Roteiro Eficaz</h2>
+    <p>Para garantir que qualquer QA consiga reproduzir o teste (a famosa reprodutibilidade), o roteiro deve conter elementos técnicos rígidos:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Elemento</th>
+            <th>Descrição</th>
+            <th>Exemplo Prático</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Pré-condição</strong></td>
+            <td>O estado necessário do sistema antes de começar.</td>
+            <td>"Usuário logado com perfil de Administrador."</td>
+          </tr>
+          <tr>
+            <td><strong>Dados de Entrada</strong></td>
+            <td>Os valores exatos a serem inseridos.</td>
+            <td>E-mail: teste@empresa.com / Senha: 12345</td>
+          </tr>
+          <tr>
+            <td><strong>Passos (Steps)</strong></td>
+            <td>As ações sequenciais que o analista deve tomar.</td>
+            <td>1. Clicar em 'Configurações'; 2. Selecionar 'Excluir Conta'.</td>
+          </tr>
+          <tr>
+            <td><strong>Resultado Esperado</strong></td>
+            <td>O comportamento que valida o sucesso do teste.</td>
+            <td>"O sistema deve exibir um pop-up de confirmação."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Direcionamento de Execução</div>
+    <h2>3. Técnicas: Caixa-Preta vs. Caixa-Branca</h2>
+    <p>A modelagem do roteiro depende da visibilidade que o QA tem do "motor" do software:</p>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Caixa-Preta</h4>
+        <p>O foco é no comportamento. O roteiro descreve entradas e saídas sem se preocupar com o código. É o ponto de vista do usuário.</p>
+      </div>
+      <div class="col-card">
+        <h4>Caixa-Branca</h4>
+        <p>O roteiro exige conhecimento da estrutura interna. Os passos podem incluir a verificação de caminhos lógicos, loops e fluxos de dados no código.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Direcionamento de Execução</div>
+    <h2>4. Manutenção e Regressão</h2>
+    <p>O valor real do roteiro aparece no Teste Relacionado à Mudança. Quando o sistema evolui, o roteiro serve de "vacina" contra erros antigos que poderiam voltar.</p>
+    <p>Se um roteiro de login foi escrito há dois anos e o código foi alterado hoje, rodar esse mesmo roteiro garante que a funcionalidade legada permanece íntegra (Teste de Regressão).</p>
+    <p>Um roteiro bem escrito transforma o conhecimento tácito (o que está na cabeça das pessoas) em conhecimento explícito (documentado), o que reduz drasticamente o onboarding de novos membros e o risco operacional.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>B. Explicação didática: A Receita de Bolo</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia</div>
+      O roteiro de testes é como uma receita de bolo enviada para um amigo. Você não pode escrever "coloque farinha e asse no ambiente de sempre". Você precisa dizer: "Pré-condição: ligue o forno a 180 graus (Onde). Passo 1: Adicione 200g de farinha e bata por 3 minutos (Como). Resultado Esperado: A massa deve ficar homogênea sem bolinhas (O Que)". Se você não detalhar, o bolo do seu amigo vai solar e dar prejuízo!
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>C. Visualizando: Fluxo de Diagrama</h2>
+    <p>Um fluxo de diagrama em blocos sequenciais: [Pré-condição do Ambiente] -> [Dado de Entrada (Ex: CPF Inválido)] -> [Ação Executada (Clicar em 'Avançar')] -> [Resultado Esperado (Exibir mensagem de 'Erro')].</p>
+    <p>Setas de ciclo de repetição (loop) apontam para trás ilustrando que o teste será re-executado repetidamente na fase de Regressão.</p>
+      </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>C. Visualizando: Fluxo de Diagrama</h2>
+    <p>img02.png</p>
+      </div>
+
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>D. Exemplo de Código: Formato BDD</h2>
+    <div class="code-block"># Roteiro de Teste (Formato BDD - Behavior Driven Development)
+Funcionalidade: Divisao de Pagamento PIX
+Cenario: Dividir conta de R$ 100 entre 4 amigos
+Dado que estou logado no "App de Delivery Invest"
+E a minha sacola possui um pedido no valor total de "100.00"
+Quando eu seleciono a opcao "Pagamento via PIX"
+E escolho a opcao "Dividir com 3 amigos"
+Entao o sistema deve gerar um QRCode principal
+E enviar uma cobranca de "25.00" para cada amigo selecionado</div>
+    <p><strong>E. Explicação linha por linha:</strong></p>
+    <ul>
+      <li><strong>Linha 2:</strong> Definimos a Funcionalidade maior que estamos testando para organizar a nossa suíte de testes.</li>
+      <li><strong>Linha 3:</strong> O Cenario descreve exatamente o caso de teste específico (O Quê).</li>
+      <li><strong>Linha 4-5:</strong> Usamos a palavra reservada Dado para configurar o ambiente e a pré-condição (estar logado e com sacola preenchida).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>Explicação BDD (Cont.)</h2>
+    <ul>
+      <li><strong>Linha 6-7:</strong> O Quando descreve as ações executadas pelo usuário na interface (O Como).</li>
+      <li><strong>Linha 8-9:</strong> O Entao e E são cruciais; validam o comportamento esperado (gerar QRCode e realizar a matemática financeira correta no backend).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>F. Atividade Prática: O "Teste Cego" da Qualidade</h2>
+    <div class="callout green">
+      <div class="callout-title">Objetivo</div>
+      Compreender o impacto da má documentação na rastreabilidade e eficiência dos testes de software.
+    </div>
+    <p><strong>Introdução:</strong> Um roteiro de testes eficaz deve ser autoexplicativo. O objetivo desta atividade é avaliar a capacidade de execução de um roteiro quando o conhecimento "está apenas na cabeça" do autor original, e não no documento.</p>
+    <p><strong>Parte 1: Análise do Roteiro (O "Teste Cego")</strong></p>
+    <p>Abaixo, encontra-se um trecho de um roteiro funcional técnico em formato YAML. Leia-o atentamente e tente imaginar a execução deste teste em um sistema real.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteiro de Testes</div>
+    <h2>YAML de Exemplo</h2>
+    <div class="code-block">YAML
+id: 0042
+test_case: "Validar fluxo principal"
+setup: "Banco de dados ok e internet funcionando"
+steps:
+  - step: 1
+    action: "Colocar o documento no campo"
+    input: "123.456.789-00"
+  - step: 2
+    action: "Clicar no botão azul"
+  - step: 3
+    action: "Avançar até o final"
+expected_result: "O sistema deve mostrar que deu certo e não dar erro."
+priority: "Alta"</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Atividade Prática</div>
+    <h2>Parte 2: Questionário de Diagnóstico</h2>
+    <p>Com base na leitura acima, responda de forma individual e honesta:</p>
+    <ul>
+      <li>1. Ambiguidade de Ambiente: O que exatamente significa "Banco de dados ok"? Como você prepararia o ambiente para iniciar esse teste?</li>
+      <li>2. Ambiguidade de Entrada: O dado 123.456.789-00 refere-se a um CPF real, um CPF fictício que deve ser rejeitado ou um dado de teste já cadastrado?</li>
+      <li>3. Identificação de Interface: Se a tela possuir dois botões azuis (ex: "Salvar" e "Limpar"), qual ação você tomaria no Passo 2?</li>
+      <li>4. Critério de Aceite: Como você confirmaria que o teste "Passou" ou "Falhou" baseando-se apenas no resultado esperado descrito?</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Atividade Prática</div>
+    <h2>Instruções de Entrega do Teste Cego</h2>
+    <p>Para concluir esta atividade, você deve entregar um documento PDF contendo os seguintes itens:</p>
+    <ul>
+      <li><strong>Identificação:</strong> Nome completo e data.</li>
+      <li><strong>Diagnóstico Crítico:</strong> Suas respostas para as 4 perguntas da Parte 2.</li>
+      <li><strong>A Refatoração (O Roteiro Padrão-Ouro):</strong> Reescreva o roteiro acima utilizando as boas práticas discutidas em aula (clareza em pré-condições, passos inequívocos e resultados esperados verificáveis).</li>
+      <li><strong>Dica:</strong> Você pode inventar o contexto (ex: Login, Cadastro de Cliente, Venda), desde que o novo roteiro seja compreensível para qualquer pessoa.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Atividade Prática</div>
+    <h2>Prazo, Canal e Critérios</h2>
+    <ul>
+      <li><strong>Prazo e Canal:</strong>
+        <ul>
+          <li>Data Limite: [Inserir Data] até às [Inserir Hora].</li>
+          <li>Plataforma: Enviar via [Inserir Portal/E-mail/AVA].</li>
+          <li>Formato do arquivo: Atividade_TesteCego_NomeDoAluno.pdf.</li>
+        </ul>
+      </li>
+      <li><strong>Critérios de Avaliação:</strong>
+        <ul>
+          <li>Capacidade analítica em identificar falhas no roteiro original.</li>
+          <li>Precisão técnica na reescrita do roteiro (uso correto de pré-condições e resultados esperados).</li>
+          <li>Organização e clareza do documento entregue.</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Hierarquia de Atividades e A Pirâmide de Automação</h2>
+      <p>Estratégia de eficiência em Qualidade de Software e Shift-Left.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>A. Conceito: Onde investir seu esforço?</h2>
+    <p>Esse conceito aborda a estratégia de eficiência em Qualidade de Software. Enquanto o roteiro de testes (que vimos anteriormente) foca no "como executar", a Pirâmide de Testes e o Shift-Left focam no "onde investir" para que o projeto não se torne caro e lento demais.</p>
+    <p>Aqui estão os detalhamentos técnicos desses pilares:</p>
+    <p><strong>1. A Pirâmide de Automação: Onde investir seu esforço?</strong></p>
+    <p>A Pirâmide é um guia para evitar o "Antipadrão Sorvete" (onde se testa muito a interface e pouco a base). A lógica é: quanto mais baixo o nível, mais rápido e barato é o teste.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>Base, Meio e Topo</h2>
+    <ul>
+      <li><strong>Base (Unidade):</strong> Testa o "átomo" do código (uma função de soma, um cálculo de desconto). Se a base for sólida, o resto do sistema tem menos chances de falhar.</li>
+      <li><strong>Meio (Serviço/Integração):</strong> Testa se os componentes conversam entre si. Aqui usamos Mocks (simuladores de comportamento) para testar uma API sem precisar que o servidor real esteja ligado, por exemplo.</li>
+      <li><strong>Topo (UI/Sistema):</strong> Testa a jornada do usuário. É o nível mais caro porque depende de navegadores, latência de rede e elementos visuais que mudam o tempo todo.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>2. Atividades Estáticas vs. Dinâmicas</h2>
+    <p>Muitas pessoas acham que testar é apenas "rodar o software", mas a engenharia de qualidade divide isso em dois momentos cruciais:</p>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Atividades Estáticas (Prevenção)</h4>
+        <p>É o teste sem execução. Revisão de código (Code Review), análise de documentos de requisitos e diagramas. É aqui que você descobre que uma regra de negócio está errada antes mesmo do programador escrever a primeira linha de código.</p>
+      </div>
+      <div class="col-card">
+        <h4>Atividades Dinâmicas (Detecção)</h4>
+        <p>É o software em movimento. Envolve a execução dos roteiros que discutimos antes, inserindo dados e validando saídas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>3. O Conceito de Shift-Left Testing</h2>
+    <p>Tradicionalmente, o teste era a última fase antes do lançamento. O Shift-Left propõe "empurrar" o teste para a esquerda no cronograma (ou seja, para o início).</p>
+    <div class="callout red">
+      <div class="callout-title">Lógica Financeira</div>
+      A lógica financeira: Um erro encontrado na fase de design (estático) custa $1. O mesmo erro encontrado após o código escrito custa $10. Se o erro chegar ao usuário final, ele pode custar $100 ou mais (perda de reputação, processos, suporte).
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>Quadro Comparativo: Resumo dos Níveis</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nível de Teste</th>
+            <th>Velocidade</th>
+            <th>Custo</th>
+            <th>Volume Recomendado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unidade</strong></td>
+            <td>Ultra Rápido</td>
+            <td>Baixíssimo</td>
+            <td>Muitos (Cobre a lógica)</td>
+          </tr>
+          <tr>
+            <td><strong>Integração</strong></td>
+            <td>Médio</td>
+            <td>Moderado</td>
+            <td>Alguns (Cobre a comunicação)</td>
+          </tr>
+          <tr>
+            <td><strong>Sistema</strong></td>
+            <td>Lento</td>
+            <td>Alto</td>
+            <td>Poucos (Cobre fluxos críticos)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>B. Explicação didática: A Analogia do Fast Food</h2>
+    <div class="callout blue">
+      <div class="callout-title">A Analogia do Fast Food</div>
+      A Pirâmide de Automação é como montar o cardápio e os processos de um Fast Food. A Base (Unidade) é o chapeiro conferindo se a carne está no ponto de forma rápida e barata em cada hambúrguer. O Meio (Integração) é ver se a carne, o pão e a salada encaixaram na bandeja. O Topo (Sistema) é simular um cliente consumindo o lanche final, o que demora mais tempo.
+    </div>
+    <p>Se deixarmos para testar a carne só quando o cliente morder (Sistema), a devolução é demorada e cara. Temos que achar o erro lá na chapa (Unidade)!</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>C. Visualizando: Desenho da Pirâmide</h2>
+    <p>Desenhe um triângulo dividido em três faixas horizontais. Na grande base larga, escreva "UNIDADE - Rápido, Barato, Alta Quantidade".</p>
+    <p>Na faixa intermediária, escreva "INTEGRAÇÃO - Integra Banco de Dados/APIs".</p>
+    <p>Na pequena ponta do triângulo, escreva "SISTEMA/UI - Lento, Caro, Baixa Quantidade, Quebra fácil".</p>
+    <p>Ao lado do triângulo, uma seta apontando de cima para baixo indicando o "Aumento da Velocidade".</p>
+      </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>C. Visualizando: Desenho da Pirâmide</h2>
+    <p>img03.png</p>
+      </div>
+
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>D. Exemplo de Código: Teste de Unidade com Jest</h2>
+    <div class="code-block">JavaScript
+// Teste de Unidade (Base da Piramide) usando framework Jest
+const { dividirPix } = require('./pixService');
+describe('Suite de Testes de Unidade - Pagamentos', () => {
+test('Deve dividir uma conta de 100 reais para 4 pessoas perfeitamente', () => {
+// 1. Arrange (Preparar como no planejamento)
+const valorTotal = 100.00;
+const qtdeAmigos = 4;
+// 2. Act (Agir - execucao dinamica)
+const resultado = dividirPix(valorTotal, qtdeAmigos);
+// 3. Assert (Verificar - O nosso "Entao" do roteiro)
+expect(resultado).toBe(25.00);
+});
+});</div>
+    <p><strong>E. Explicação linha por linha:</strong></p>
+    <ul>
+      <li><strong>Linha 2:</strong> Importamos a função de negócio dividirPix diretamente do nosso código back-end para testar isoladamente.</li>
+      <li><strong>Linha 4:</strong> Criamos a Suite agrupadora de testes de pagamento.</li>
+      <li><strong>Linha 5:</strong> Descrevemos o caso de teste, o nosso "objetivo" de planejamento neste bloco.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Hierarquia de Atividades</div>
+    <h2>Teste de Unidade (Cont.)</h2>
+    <p><strong>E. Explicação linha por linha (Cont.):</strong></p>
+    <ul>
+      <li><strong>Linha 7-8:</strong> Etapa Arrange (Configuração do estado). Definimos a entrada de R$ 100 para 4 amigos, traduzindo as regras do planejamento para código.</li>
+      <li><strong>Linha 11:</strong> Etapa Act. Executamos a função. Rápido, como a base da pirâmide exige.</li>
+      <li><strong>Linha 14:</strong> Etapa Assert. Garantimos matematicamente que o valor retornado seja exatamente 25.00.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p>As perguntas mais comuns sobre planejamento e roteirização.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-q">1. Se eu adotar Metodologias Ágeis (Scrum), o Plano de Testes precisa ser um documento enorme de 100 páginas?</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-a"><strong>Resposta:</strong> Não. Em ambientes ágeis, o plano de teste é frequentemente enxuto, direto e hospedado em wikis ou repositórios como o Jira, evoluindo a cada Sprint, ao invés de um documento gigantesco do modelo "Cascata".</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-q">2. Qual é a diferença real entre Teste de Unidade e Teste de Integração na prática do dev?</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-a"><strong>Resposta:</strong> O teste de unidade "isola" totalmente o código, você não conecta de verdade a um banco de dados (você simula). No de integração, você levanta o serviço e realmente conecta a aplicação ao banco de dados para ver se a conversa entre os dois lados funciona perfeitamente.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-q">3. Se eu terceirizar minha API e ela cair, de quem é a culpa no Roteiro de Teste?</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-a"><strong>Resposta:</strong> A culpa sistêmica é do seu produto. Por isso, na fase de Integração, os planejamentos incluem objetos "Mock" para lidar de forma graciosa com indisponibilidade de serviços terceirizados, emitindo alertas amigáveis aos usuários.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-q">4. Por que devo investir tempo nas Atividades Estáticas (Revisão) se posso rodar a aplicação para ver o erro?</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-a"><strong>Resposta:</strong> Porque arrumar um erro de arquitetura ou regra de negócio no momento de ler a documentação não custa quase nada de esforço ou codificação. Achar esse mesmo erro com o sistema em produção é dezenas de vezes mais caro e impacta o cliente real.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-q">5. A Inteligência Artificial pode criar meus Planos e Roteiros de Teste?</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Comuns</h2>
+    <div class="faq-item">
+      <div class="faq-a"><strong>Resposta:</strong> As IAs Generativas são ótimas aliadas (copilotos) para estruturar casos base em formatos padrão (como YAML ou BDD) baseados em regras descritas por você, mas elas necessitam do seu pensamento crítico. É o Engenheiro de Software quem define o Escopo Negativo corporativo e os limites financeiros do "critério de parada".</div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Exercícios de Fixação</h2>
+      <p>Prática e fixação do conhecimento</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Fácil</h2>
+    <ul>
+      <li><strong>1. O Guardião do Escopo</strong><br>
+      Descrição: Crie uma lista com 3 funcionalidades que entram no Escopo Positivo e 2 no Escopo Negativo para um "App de agendamento de consultas médicas".<br>
+      Entrega: Um arquivo texto (.txt) curto contendo as duas listas.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Fácil</h2>
+    <ul>
+      <li><strong>2. Diagnóstico Estático</strong><br>
+      Descrição: Com base na aula, cite 2 atividades de "Testes Estáticos" e explique por que elas reduzem custos na empresa.<br>
+      Entrega: Um parágrafo argumentativo no fórum/LMS da turma.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Médio</h2>
+    <ul>
+      <li><strong>3. Base Sólida</strong><br>
+      Descrição: Construa um mapa mental ou um pequeno infográfico digital detalhando os 3 níveis da Pirâmide de Automação de Testes e suas respectivas velocidades.<br>
+      Entrega: Um arquivo de imagem (.png/.jpg) ou PDF exportado do Canva ou Miro.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Médio</h2>
+    <ul>
+      <li><strong>4. O "Dado, Quando, Entao"</strong><br>
+      Descrição: Escolha uma funcionalidade do dia a dia (ex: fazer login na Netflix) e crie um roteiro de teste em formato BDD usando a sintaxe YAML da aula.<br>
+      Entrega: Um bloco de código YAML com pelo menos 1 cenário completo (Dado, Quando, Entao).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Médio</h2>
+    <ul>
+      <li><strong>5. Regras de Parada</strong><br>
+      Descrição: Defina 3 "Critérios de Conclusão (Parada)" técnicos rigorosos para um software de automação industrial onde uma falha poderia causar acidentes.<br>
+      Entrega: Um documento listando os três critérios com justificativas em formato corporativo.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Difícil</h2>
+    <ul>
+      <li><strong>6. Json de Planejamento (Planejando a SA)</strong><br>
+      Descrição: Crie a estrutura JSON completa de um Plano de Testes focado na sua Situação de Aprendizagem (A solução inovadora para a feira de investidores) contendo escopo, objetivo e criterios_de_parada.<br>
+      Entrega: Arquivo .json válido (verificado em um linter).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Difícil</h2>
+    <ul>
+      <li><strong>7. Analisando a Falha Dinâmica</strong><br>
+      Descrição: Escreva um teste unitário em JavaScript/Jest (como no exemplo da aula) testando uma função que calcula "Desconto de 10%". Insira um expect com o valor lógico esperado.<br>
+      Entrega: Arquivo .js com o bloco describe e test.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Difícil</h2>
+    <ul>
+      <li><strong>8. Refatorando o Roteiro</strong><br>
+      Descrição: Dada a premissa "o usuário tentou cadastrar um email sem @ e o sistema crashou". Modele um Roteiro de Teste preventivo (O que, Onde, Como) que deveria ter existido no planejamento para evitar isso.<br>
+      Entrega: Roteiro documentado abordando a Entrada do Teste, Ação e Saída Esperada (Tratamento de Exceção).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Difícil</h2>
+    <ul>
+      <li><strong>9. Simulação de Regressão</strong><br>
+      Descrição: Argumente por escrito: se alterarmos a classe de "Cálculo de Frete" do nosso app, por que é obrigatório acionar testes de regressão sobre a classe de "Carrinho de Compras"?<br>
+      Entrega: Um texto descritivo detalhando o impacto técnico e o conceito de rastreabilidade do planejamento.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Nível Muito Difícil</h2>
+    <ul>
+      <li><strong>10. Auditoria de Pirâmide Invertida (Desafio Master)</strong><br>
+      Descrição: Uma empresa relatou que gasta 80% do seu tempo com testes de UI (Interface Gráfica) clicando na tela manualmente e 20% criando scripts de backend (Unidade). Aja como um consultor sênior de QA e elabore um plano de ação listando o risco desse cenário e sugerindo melhorias estruturais de acordo com o padrão ISO/Mercado.<br>
+      Entrega: Um relatório de 1 página (PDF) focado na adoção do "Shift Left" e Pirâmide de Automação.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conclusão</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>Todo este universo de estratégia será a espinha dorsal do projeto de vocês. Como a nossa missão é desenvolver "uma solução inovadora", pensem: se o nosso MVP (Mínimo Produto Viável) falhar no momento do pitch (apresentação), perdemos o aporte financeiro.</p>
+    <p>A avaliação prática da nossa SA exige que vocês organizem a documentação (Plano de Teste) e demonstrem a aplicação dos roteiros antes da banca de avaliação.</p>
+    <p>Vocês serão cobrados profissionalmente por garantir essa estabilidade e por mapear perfeitamente o seu Escopo Negativo (o que o app de vocês ainda não faz) perante os investidores.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conclusão</div>
+    <h2>Conexão com a Próxima Aula</h2>
+    <p>Na próxima aula, daremos vida e técnica visual a esses documentos.</p>
+    <p>Iremos mergulhar fundo nas Técnicas de Design de Casos de Teste (Caixa Branca, Caixa Preta), onde aprenderemos a aplicar engenharia matemática, como Classes de Equivalência e Análise do Valor Limite, para não precisar testar números infinitos em campos do sistema.</p>
+    <div class="callout green">
+      <div class="callout-title">Ação</div>
+      Preparem os códigos e tragam os requisitos dos projetos de vocês à mão!
+    </div>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 54</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    let dx = e.changedTouches[0].clientX - touchX;
+    if (dx > 50) changeSlide(-1);
+    if (dx < -50) changeSlide(1);
+  });
+
+  // Inicializa a apresentação
+  showSlide(0);
+</script>
+
+</body>
+</html>
