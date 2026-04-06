@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 07 - Métodos e Técnicas de Teste</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 100%;
+    --slide-title-max: 90%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  .slide-cover {
+    background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-color: var(--surface);
+    position: relative;
+  }
+
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide p {
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.85rem, 1.6vw, 1rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    line-height: 1.7;
+  }
+  .callout.blue { background: #dceefb; border-left: 4px solid var(--accent2); color: var(--ink); }
+  .callout.green { background: #e1f5e8; border-left: 4px solid #2e7d32; color: #1a3a28; }
+  .callout.red { background: #e3f0fb; border-left: 4px solid var(--accent); color: var(--ink); }
+  .callout.yellow { background: #e8f4fd; border-left: 4px solid var(--accent3); color: var(--ink); }
+  
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .85rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  .section-header { text-align: center; padding: 60px 20px; }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  }
+
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Aula 07</div>
+    <h1>Métodos e Técnicas de Teste</h1>
+    <p class="cover-desc">
+      Descrição: Reconhecimento e aplicação de normas, métodos e técnicas de modelagem de testes, focando em estratégias estruturais e comportamentais.
+    </p>
+    <hr class="divider">
+    <div class="topics-grid">
+      <div class="topic-chip">Caixa Preta, Branca e Cinza</div>
+      <div class="topic-chip">Normas Vigentes</div>
+      <div class="topic-chip">Partição de Equivalência</div>
+      <div class="topic-chip">Valor Limite (BVA)</div>
+    </div>
+    <div class="cover-meta">
+      <span>Engenharia de Qualidade</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real</h2>
+    <div class="callout yellow">
+      <div class="callout-title">Cenário de Mercado</div>
+      <p>Imagine que uma gigante do e-commerce lança a maior promoção do ano. Em questão de minutos, milhares de usuários tentam finalizar suas compras, mas um erro oculto na estrutura de cálculo de fretes derruba o sistema de pagamentos. O prejuízo? Milhões de reais perdidos em poucas horas, além da frustração massiva dos clientes.</p>
+    </div>
+    <p>No mercado atual, a velocidade de desenvolvimento não pode sacrificar a confiabilidade. É por isso que grandes empresas investem pesadamente na Engenharia de Qualidade, aplicando técnicas robustas para encontrar falhas arquiteturais e lógicas antes que elas atinjam o usuário final.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Reflexão</h2>
+    <div class="callout blue">
+      <div class="callout-title">Pergunta Desafiadora</div>
+      <p>Quantas vezes você já abandonou o uso de um aplicativo ou site porque um botão não funcionava ou o sistema travou em uma tela de carregamento infinita? O que você acha que faltou no processo de construção desse software?</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Estratégias de Visibilidade</h2>
+      <p>Caixa Preta, Branca e Cinza</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>A. Conceito</h2>
+    <p>Os métodos de teste representam diferentes filosofias de abordagem que derivam casos de teste baseados no nível de visibilidade que o testador possui da estrutura interna do software.</p>
+    <p>O <strong>Teste de Caixa Branca</strong> (também chamado de teste estrutural) exige que nós tenhamos acesso e conhecimento profundo sobre a estrutura de controle, lógica e caminhos internos do código-fonte, visando garantir que todos os caminhos independentes e decisões lógicas sejam exercitados.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>A. Conceito (Continuação)</h2>
+    <p>Por outro lado, o <strong>Teste de Caixa Preta</strong> foca exclusivamente nos requisitos funcionais do sistema, testando o que entra e o que sai pelas interfaces do usuário, ignorando os detalhes de implementação por trás dos panos.</p>
+    <p>O <strong>Teste de Caixa Cinza</strong> surge como uma poderosa abordagem híbrida, sendo muito utilizada em testes de integração. Nesta técnica, nós validamos o sistema através das interfaces externas (visão de usuário), mas orientamos nosso planejamento de testes a partir de um conhecimento parcial da arquitetura interna e dos fluxos de dados, o que é excelente para testes baseados em riscos.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>Adaptabilidade</h2>
+    <p>Dominar esses três perfis desenvolve uma Soft Skill fundamental: a adaptabilidade.</p>
+    <div class="callout blue">
+      <div class="callout-title">Foco do Profissional</div>
+      <p>Precisamos saber transitar entre a mentalidade de quem constrói (desenvolvedor) e a de quem usa (cliente).</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>B. Visualizando</h2>
+    <p>Imagine um painel triplo:</p>
+    <ul>
+      <li><strong>À esquerda:</strong> um usuário clicando em botões de um formulário sem ver o que ocorre no servidor (Caixa Preta).</li>
+      <li><strong>À direita:</strong> um painel exibindo loops e condicionais if/else sendo lidos e ativados pelo computador (Caixa Branca).</li>
+      <li><strong>No centro:</strong> um diagrama conectando blocos de banco de dados e APIs (Caixa Cinza).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>B. Visualizando</h2>
+<img src="img01.png" style="max-width: 100%; height: auto;">
+  </div>
+  
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>C. Exemplo de Código</h2>
+    <div class="code-block">// Exemplo em JavaScript simulando uma validação de acesso
+function verificarAcesso(idade, temConvite) {
+// CAIXA BRANCA: Como desenvolvedores, precisamos garantir
+// que tanto o lado VERDADEIRO quanto o FALSO deste IF sejam testados.
+if (idade >= 18 || temConvite) {
+    return "Acesso Liberado";
+} else {
+    return "Acesso Negado";
+}
+}
+// CAIXA PRETA: Simulando a visão do usuário (apenas inserimos dados e vemos a saída)
+console.log(verificarAcesso (20, false)); // Esperado: "Acesso Liberado"
+console.log(verificarAcesso (16, false)); // Esperado: "Acesso Negado"
+console.log(verificarAcesso (15, true)); // Esperado: "Acesso Liberado"</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>1.</strong> function verificarAcesso (idade, temConvite) { - Definimos a função recebendo dois parâmetros.</li>
+      <li><strong>2.</strong> if (idade >= 18 || temConvite) { - A lógica estrutural (Caixa Branca). Avaliamos se o usuário tem 18 anos ou mais, ou se possui convite.</li>
+      <li><strong>3.</strong> return "Acesso Liberado"; - Caminho lógico ativado caso a condição seja verdadeira.</li>
+      <li><strong>4.</strong> } else { - Alternativa lógica.</li>
+      <li><strong>5.</strong> return "Acesso Negado"; - Caminho lógico caso a condição seja falsa.</li>
+      <li><strong>6.</strong> } Fechamento do bloco condicional e da função.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>D. Explicação linha por linha (Caixa Preta)</h2>
+    <ul>
+      <li><strong>7.</strong> console.log(verificarAcesso(20, false)); - Teste de Caixa Preta validando a regra principal (idade suficiente).</li>
+      <li><strong>8.</strong> console.log(verificarAcesso (16, false)); - Teste de Caixa Preta validando a rejeição (idade insuficiente sem convite).</li>
+      <li><strong>9.</strong> console.log(verificarAcesso(15, true)); - Teste de Caixa Preta validando a exceção da regra (convite anula idade).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Estratégias de Visibilidade</div>
+    <h2>E. Debate</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercícios de Discussão</div>
+      <ol>
+        <li>Defina com suas palavras a diferença central entre o teste de Caixa Branca e o de Caixa Preta.</li>
+        <li>Por que o teste de Caixa Cinza é considerado uma abordagem "híbrida"?</li>
+        <li>Olhando para o código acima, crie um novo console.log para testar um caminho de Caixa Preta ainda não validado.</li>
+        <li>Se uma falha ocorrer apenas quando a variável idade receber um dado tipo String, qual técnica (Preta ou Branca) descobriria a origem da falha mais rápido? Justifique.</li>
+        <li>Em qual nível de teste (Unitário, Integração ou Aceitação do Cliente) você acredita que a Caixa Preta é mais utilizada?</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Normas Vigentes e Ciclo de Vida de Defeitos</h2>
+      <p>Documentação e Padronização de Testes</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>A. Conceito</h2>
+    <p>Para atuar como desenvolvedores e testadores em nível global, não basta encontrar os erros; é necessário documentá-los de forma padronizada.</p>
+    <p>A norma internacional <strong>ISO/IEC/IEEE 29119</strong> define terminologias, processos e ciclos de vida de teste rigorosos, garantindo que o reporte e a correção de falhas sigam um fluxo totalmente auditável e eficiente.</p>
+    <p>Quando adotamos normas internacionais, criamos uma linguagem universal. Um erro reportado no Brasil é facilmente compreendido, reproduzido e corrigido por um time parceiro no Japão.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>A. Conceito (Continuação)</h2>
+    <p>O uso dessa padronização fomenta uma comunicação técnica clara e livre de ambiguidades. Isso também exige pensamento crítico e empatia (o desenvolvedor não sabe o que você fez no sistema para causar o erro, você deve detalhar).</p>
+    <p>Na era moderna, nós podemos usar IA Generativa de forma ética para revisar se nossos "Bug Reports" estão em conformidade com as normas da IEEE antes de submetê-los, acelerando a etapa burocrática, desde que validemos a saída da IA com o nosso próprio rigor técnico.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>B. Visualizando</h2>
+    <div class="callout blue">
+      <div class="callout-title">Fluxograma</div>
+      <p>Visualize um fluxograma mostrando o ciclo de vida de um defeito (Bug Lifecycle): um ticket nasce como "Novo" (New), é encaminhado para "Atribuído" (Assigned), o desenvolvedor o move para "Corrigido" (Fixed), o QA verifica em "Reteste" (Retest) e, finalmente, ele vai para "Fechado" (Closed).</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>B. Visualizando</h2>
+<img src="img02.png" style="max-width: 100%; height: auto;">
+  </div>
+  
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>C. Exemplo de Código</h2>
+    <div class="code-block">// Exemplo Node.js usando padronização JSON para reporte de falha (Baseado em normas da indústria)
+const relatorioDeFalha = {
+    id_teste: "TC-001",
+    titulo: "Falha na verificação de acesso com idade negativa",
+    severidade: "Alta", // Baseado no impacto para o sistema
+    ambiente: "Produção v1.2.0",
+    passos_reproduzir: [
+        "1. Acessar a função verificarAcesso",
+        "2. Inserir a idade '-5'",
+        "3. Observar o retorno"
+    ],
+    resultado_esperado: "Erro de validação: Idade inválida",
+    resultado_obtido: "Sistema retornou: Acesso Negado (sem acusar formato incorreto)"
+};
+console.log(`Reportando Bug: ${relatorioDeFalha.titulo} - Severidade: ${relatorioDeFalha.severidade}`);</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>1.</strong> const relatorioDeFalha = { - Criamos um objeto estruturado em JSON para representar o ticket.</li>
+      <li><strong>2.</strong> id_teste: "TC-001", - Identificador único que auxilia na rastreabilidade e auditoria.</li>
+      <li><strong>3.</strong> titulo: "Falha na...", - Resumo claro e direto do problema.</li>
+      <li><strong>4.</strong> severidade: "Alta", - Classificação da prioridade para o time de correção (Norma de Gerenciamento).</li>
+      <li><strong>5.</strong> ambiente: "Produção v1.2.0", - Essencial para garantir a reprodutibilidade.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>D. Explicação linha por linha (Continuação)</h2>
+    <ul>
+      <li><strong>6.</strong> passos_reproduzir: [...] - Array contendo a exata sequência de ações que causam a falha.</li>
+      <li><strong>7.</strong> resultado_esperado: - O comportamento que a documentação pedia.</li>
+      <li><strong>8.</strong> resultado_obtido: O comportamento falho que o sistema apresentou.</li>
+      <li><strong>9.</strong> }; Fim do objeto.</li>
+      <li><strong>10.</strong> console.log(...) - Simula o envio deste ticket para um sistema como o Jira ou Trello.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Normas Vigentes</div>
+    <h2>E. Debate</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercícios de Discussão</div>
+      <ol>
+        <li>Cite o nome da norma internacional principal que rege os testes de software.</li>
+        <li>Por que a documentação de "passos para reproduzir" é o coração de um relatório de falhas?</li>
+        <li>Explique a diferença entre "Resultado Esperado" e "Resultado Obtido".</li>
+        <li>Como a adoção de normas ajuda na comunicação (Soft Skills) dentro de uma equipe diversa?</li>
+        <li>Qual seria o perigo de não categorizarmos a "Severidade" em um sistema com 1000 bugs reportados?</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Design de Casos de Teste</h2>
+      <p>Partição de Equivalência e Valor Limite</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>A. Conceito</h2>
+    <p>Aplicar técnicas de modelagem no design de casos de teste é a nossa principal ferramenta para garantir cobertura de software sem precisarmos testar infinitas combinações de números e palavras.</p>
+    <p>A <strong>"Partição de Equivalência"</strong> atua dividindo os domínios de dados em conjuntos de classes válidas e inválidas, assumindo a premissa de que testar apenas um representante de cada classe já é suficiente para encontrar os mesmos erros dos demais.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>Análise de Valor Limite (BVA)</h2>
+    <p>Complementando essa técnica, nós utilizamos a "Análise de Valor Limite (BVA)".</p>
+    <p>Historicamente, a programação está repleta de defeitos que ocorrem exatamente nos limiares das validações matemáticas (por exemplo, ao usar &lt; em vez de &lt;=). A BVA foca em testar os valores imediatamente acima, abaixo e sobre as fronteiras lógicas.</p>
+    <div class="callout yellow">
+      <div class="callout-title">Rastreabilidade</div>
+      <p>Combinar essas duas abordagens permite que você estruture uma Matriz de Rastreabilidade que prova tecnicamente aos gerentes de projeto que todas as funcionalidades e requisitos foram cobertos e exaustivamente testados.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>B. Visualizando</h2>
+    <p>Pense em uma régua numérica para um sistema que aceita usuários de 18 a 60 anos.</p>
+    <ul>
+      <li>As partições de equivalência são: Inválida (&lt;18), Válida (18 a 60), Inválida (&gt;60).</li>
+      <li>Os valores limites a serem testados seriam exatamente nas fronteiras: 17, 18, 19, 59, 60, 61.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>B. Visualizando</h2>
+<img src="img03.png" style="max-width: 100%; height: auto;">
+  </div>
+  
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>C. Exemplo de Código</h2>
+    <div class="code-block">// Testando limites para um desconto válido apenas para compras entre R$ 100 e R$ 500
+function calcularDesconto (valor) {
+    if (valor >= 100 && valor <= 500) {
+        return valor * 0.9; // 10% de desconto
+    }
+    return valor; // Sem desconto
+}
+
+// Aplicação de Análise de Valor Limite (BVA) na base (100)
+console.log("Limite Inferior Inválido (99):", calcularDesconto (99)); // 99
+console.log("Limite Inferior Exato (100):", calcularDesconto (100)); // 90
+console.log("Limite Inferior Válido (101):", calcularDesconto(101)); // 90.9
+
+// Aplicação de Análise de Valor Limite (BVA) no topo (500)
+console.log("Limite Superior Válido (499):", calcularDesconto (499)); // 449.1
+console.log("Limite Superior Exato (500):", calcularDesconto (500)); // 450
+console.log("Limite Superior Inválido (501):", calcularDesconto(501)); // 501</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>1.</strong> function calcularDesconto (valor) { - Função para calcular a regra de negócio do desconto.</li>
+      <li><strong>2.</strong> if (valor >= 100 && valor <= 500) { - Estabelecemos as fronteiras numéricas do desconto.</li>
+      <li><strong>3.</strong> return valor * 0.9; - Aplica-se o desconto se os valores estiverem dentro da classe de equivalência válida.</li>
+      <li><strong>4.</strong> } Fecha o if.</li>
+      <li><strong>5.</strong> return valor; - Retorno padrão caso não entre no if.</li>
+      <li><strong>6-14.</strong> console.log(...) - Roteiro de testes focado milimetricamente nas beiradas numéricas (99, 100, 101 e 499, 500, 501) para descobrir erros de sinal de maior ou menor no código-fonte.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Design de Casos de Teste</div>
+    <h2>E. Debate</h2>
+    <div class="callout green">
+      <div class="callout-title">Exercícios de Discussão</div>
+      <ol>
+        <li>O que é uma Classe de Equivalência Inválida?</li>
+        <li>Por que a Análise de Valor Limite é tão eficiente para achar bugs?</li>
+        <li>Se um sistema aceita senhas de 6 a 8 caracteres, quais tamanhos de senha você testaria usando Análise de Valor Limite?</li>
+        <li>Em vez de testar as idades 20, 21, 22, 23 (que pertencem à mesma Partição de Equivalência), qual abordagem otimizaria nosso tempo?</li>
+        <li>Qual a finalidade da "Matriz de Rastreabilidade"?</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>FAQ</h2>
+      <p>Dúvidas Reais do Dia a Dia</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Perguntas Frequentes</h2>
+    <div class="callout blue">
+      <h2>1. Eu sou obrigado a usar testes de Caixa Branca e Preta em todos os meus projetos?</h2>
+      <p><strong>Resposta:</strong> Nem sempre na mesma proporção. Desenvolvedores costumam focar em Caixa Branca (testes unitários), enquanto os analistas de QA focam na Caixa Preta e Cinza. O ideal é o projeto ter ambas as camadas (Pirâmide de Testes).</p>
+    </div>
+    <div class="callout blue">
+      <h2>2. Como posso usar ChatGPT ou outra IA nos meus testes de Valor Limite?</h2>
+      <p><strong>Resposta:</strong> Você pode pedir para a IA listar todos os limites lógicos de uma regra de negócio complexa. No entanto, é você quem decide se a sugestão faz sentido para o negócio, revisando eticamente e com responsabilidade técnica.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Perguntas Frequentes</h2>
+    <div class="callout blue">
+      <h2>3. Se eu não usar uma norma ISO, meu software não funciona?</h2>
+      <p><strong>Resposta:</strong> Ele funciona, mas quando a equipe crescer ou você precisar prestar contas ao cliente, a falta de documentação rastreável e padronizada gerará gargalos, atrasos e perda de credibilidade.</p>
+    </div>
+    <div class="callout blue">
+      <h2>4. O que faço quando acho um Bug que o desenvolvedor diz ser uma "Feature"?</h2>
+      <p><strong>Resposta:</strong> É aqui que entra a documentação (Requisitos) e a Matriz de Rastreabilidade. O comportamento do sistema deve ser confrontado com o que foi homologado no design de requisitos e testado funcionalmente.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Perguntas Frequentes</h2>
+    <div class="callout blue">
+      <h2>5. Se eu testar todos os limites usando BVA, garanto um sistema 100% sem erros?</h2>
+      <p><strong>Resposta:</strong> Não. Testar exaustivamente não prova a ausência total de defeitos (é um dos princípios do teste), mas diminui drasticamente a probabilidade de falhas críticas de negócio.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Exercícios de Fixação</h2>
+      <p>Entrega no AVA</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Observação Importante</h2>
+    <div class="callout red">
+      <div class="callout-title">Instruções de Entrega</div>
+      <p>Todas as respostas devem estar em um documento único, em formato pdf e entregues na tarefa do AVA.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>1. Identificando a Caixa</h2>
+    <p><strong>Descrição:</strong> Dada uma situação onde o testador não tem acesso ao banco de dados e apenas usa a interface web do sistema, identifique e explique qual é a estratégia visual adotada.</p>
+    <p><strong>Entrega:</strong> Um parágrafo argumentativo identificando a técnica.</p>
+    
+    <hr class="divider">
+    
+    <h2>2. Criando as Partições</h2>
+    <p><strong>Descrição:</strong> Um sistema de fretes cobra R$ 10,00 para entregas até 5km, e R$ 25,00 para entregas acima de 5km e até 20km. Liste quais são as três partições de equivalência numéricas.</p>
+    <p><strong>Entrega:</strong> Uma lista simples descrevendo os conjuntos de valores.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>3. Operação Limites (BVA)</h2>
+    <p><strong>Descrição:</strong> Com base no sistema de frete do exercício anterior, estabeleça os 6 cenários de teste usando a Análise de Valor Limite para o ponto de transição de 5km e para o limite máximo de 20km.</p>
+    <p><strong>Entrega:</strong> Uma tabela listando o limite inferior e superior para as distâncias 5km e 20km.</p>
+    
+    <hr class="divider">
+    
+    <h2>4. Escrevendo o Bug Report - Nível 1</h2>
+    <p><strong>Descrição:</strong> Você tentou acessar uma rota de API com credenciais vazias, e o sistema travou com código 500, quando deveria retornar um erro 401 amigável. Monte um relatório simples deste erro.</p>
+    <p><strong>Entrega:</strong> Objeto em JSON ou formato de lista contendo Título, Passos e Resultados (esperado x obtido).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>5. Codificando e Quebrando a Caixa Branca</h2>
+    <p><strong>Descrição:</strong> Crie uma função simples em JavaScript que aprova empréstimos apenas se o usuário ganhar mais de R$ 2000,00 E não tiver restrição no nome. Escreva 2 testes que foquem na estrutura de controle (if/else).</p>
+    <p><strong>Entrega:</strong> Código JavaScript limpo e comentado.</p>
+    
+    <hr class="divider">
+    
+    <h2>6. IA no Design de Casos</h2>
+    <p><strong>Descrição:</strong> Utilize uma IA Generativa de sua preferência (ChatGPT, Gemini) e peça para gerar os Casos de Teste (BVA) de um sistema bancário que autoriza saques de até R$ 1000,00 por dia. Avalie criticamente a saída gerada.</p>
+    <p><strong>Entrega:</strong> Um print da interação com a IA e um parágrafo validando ou corrigindo a sugestão dela.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>7. Matriz de Rastreabilidade Simulada</h2>
+    <p><strong>Descrição:</strong> Crie uma mini Matriz de Rastreabilidade no Excel ou em Tabela. Conecte o Requisito "Sistema deve permitir login válido" aos Casos de Testes: CT01 (Senha correta), CT02 (Senha incorreta), CT03 (SQL Injection).</p>
+    <p><strong>Entrega:</strong> Tabela de rastreabilidade (ID Requisito, Descrição, IDs de Casos de Teste).</p>
+    
+    <hr class="divider">
+    
+    <h2>8. O Bug de Negócio (Caixa Preta)</h2>
+    <p><strong>Descrição:</strong> Um botão de "Adicionar ao Carrinho" não responde ao ser clicado quando há apenas 1 item no estoque. Escreva um Roteiro de Testes Passo a Passo padronizado para reportar à equipe de desenvolvimento.</p>
+    <p><strong>Entrega:</strong> Documento estruturado seguindo os campos base da ISO 29119 adaptados (ID, Condição Inicial, Passos, Dados de entrada, Saídas).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>9. Testador Arquiteto (Caixa Cinza)</h2>
+    <p><strong>Descrição:</strong> Descreva como você faria um teste de Caixa Cinza sabendo que o formulário de cadastro de usuário na interface web se comunica com um Banco de Dados Relacional. O que você verificaria além da tela de "Sucesso"?</p>
+    <p><strong>Entrega:</strong> Explicação técnica detalhando a validação no front-end e a consulta SQL no back-end.</p>
+    
+    <hr class="divider">
+    
+    <h2>10. Refatoração de Limites no Código</h2>
+    <p><strong>Descrição:</strong> Uma função Javascript possui este código: if (idade>18){acesso=true;}. Um QA apontou um defeito pois jovens exatamente com 18 anos estão sendo barrados. Refatore o código e construa os logs baseados na BVA para comprovar a solução.</p>
+    <p><strong>Entrega:</strong> Código refatorado acompanhado das invocações de console.log() testando os números 17, 18 e 19.</p>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Fechamento</h2>
+      <p>Próximos Passos</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Fechamento</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>Todo este rigor na modelagem que aprendemos hoje será a base para a nossa Avaliação Prática.</p>
+    <p>Durante o projeto, vocês serão avaliados justamente por suas habilidades em organizar o ambiente, localizar e classificar falhas na execução do teste e, o mais importante, por identificar ferramentas e estruturar o planejamento de roteiros técnicos seguindo estas metodologias (Caixa Preta/Branca) е critérios de aceitação rigorosos.</p>
+    <p>Os relatórios e matrizes que vimos hoje são os entregáveis que aprovarão seus sistemas na nossa simulação de vida real.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Fechamento</div>
+    <h2>Conexão com a Próxima Aula</h2>
+    <div class="callout blue">
+      <div class="callout-title">Aula 08</div>
+      <p>A Aula 08 aborda o ciclo prático da garantia de qualidade, focando na execução meticulosa dos planos de teste e no uso de ferramentas especializadas para documentar cada etapa.</p>
+      <p>O conteúdo capacita o aluno a identificar falhas sistêmicas, realizar o registro técnico de bugs e validar o software através da comparação rigorosa entre os resultados esperados e os obtidos, garantindo um processo de gestão de defeitos eficiente e rastreável.</p>
+    </div>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 41</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    if (e.changedTouches[0].screenX < touchX - 50) changeSlide(1);
+    if (e.changedTouches[0].screenX > touchX + 50) changeSlide(-1);
+  });
+  
+  showSlide(0);
+</script>
+
+</body>
+</html>
