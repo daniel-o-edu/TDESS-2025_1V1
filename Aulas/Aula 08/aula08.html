@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 08 - Execução de Testes, Documentação e Gestão de Defeitos</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 85vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 24px; 
+    line-height: 1.5; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 20px;
+  }
+  table, th, td {
+    border: 1px solid #dee2e6;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+  }
+  th {
+    background-color: #e9ecef;
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 18px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .controls {
+    height: 70px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 10px 20px;
+    font-size: 18px; 
+    border-radius: 8px; 
+    cursor: pointer;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+  }
+  .progress { 
+    font-size: 18px; 
+    font-weight: bold; 
+  }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+    
+    <div class="slide active">
+      <h1>Aula 08 - Execução de Testes, Documentação e Gestão de Defeitos</h1>
+      <p><b>Descrição:</b> Execução prática das rotinas de teste planejadas, emprego de ferramentas para registro e validação dos resultados obtidos.</p>
+      <h3><b>Pergunta:</b> Se executarmos um sistema exaustivamente e não encontramos absolutamente nenhum erro, a nossa execução de testes foi um sucesso estrondoso ou o nosso roteiro de testes falhou em procurar nos lugares certos?</h3>
+    </div>
+
+    <div class="slide">
+      <h2>Execução de Teste Passo a Passo</h2>
+      <h3>A. Conceito:</h3>
+      <p>Entender a execução de testes é como entender a diferença entre ler uma receita de bolo e realmente ir para a cozinha. Na teoria, tudo funciona; na prática, é onde descobrimos se o forno esquenta demais ou se faltou açúcar. Aqui está uma explicação dividida pelos pilares fundamentais desse conceito:</p>
+      <h3><b>1. O que é, de fato, a Execução?</b></h3>
+      <p>É um processo dinâmico. Enquanto o planejamento do teste é estático (documentos e ideias), a execução é o "mão na massa". É rodar o software com um objetivo claro: procurar falhas. Diferente do que muitos pensam, o objetivo do testador não é "provar que o sistema funciona", mas sim tentar quebrá-lo de forma estruturada. Se você encontrar um erro, o teste foi excelente, pois evitou que esse problema chegasse ao cliente final.</p>
+    </div>
+
+    <div class="slide">
+      <h3><b>2. A Anatomia de um Caso de Teste</b></h3>
+      <p>Para que o teste não seja apenas "clicar por clicar", usamos o Caso de Teste, que possui três elementos vitais:</p>
+      <ul>
+        <li><b>Precondição:</b> O estado inicial necessário. (Ex: "O usuário deve estar logado e ter saldo na conta").</li>
+        <li><b>Dados de Entrada:</b> O que você vai digitar ou inserir. (Ex: "Valor da transferência: R$ 50,00").</li>
+        <li><b>Resultado Esperado:</b> O que o software deveria fazer segundo a regra de negócio. (Ex: "O saldo deve diminuir R$ 50,00 e o comprovante deve ser gerado").</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3><b>3. O Fluxo Lógico de Execução</b></h3>
+      <p>Para garantir que o teste seja científico e repetível, seguimos este roteiro:</p>
+      <ol>
+        <li><b>Preparação:</b> Conferir se o ambiente e as precondições estão prontos.</li>
+        <li><b>Ação:</b> Executar os passos exatos descritos no roteiro.</li>
+        <li><b>Uso do Oráculo:</b> Aqui entra a figura do "juiz". O Oráculo é qualquer fonte que nos diga qual é o comportamento correto (pode ser um documento de requisitos, um sistema antigo de comparação ou o conhecimento do especialista).</li>
+        <li><b>Validação:</b> O Oráculo compara o que o sistema fez com o que ele deveria ter feito.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3><b>4. O "Mindset" do Testador</b></h3>
+      <p>O texto traz uma quebra de paradigma importante:</p>
+      <ul>
+        <li><b>Teste bem-sucedido:</b> Encontrou um erro novo. (Vitória! O erro foi capturado antes do usuário ver).</li>
+        <li><b>Teste mal-sucedido (do ponto de vista de busca):</b> Não encontrou nada. (O sistema parece estável, mas não houve "descoberta").</li>
+      </ul>
+      <p>Essa transição da teoria para a prática exige rigor. Se você pular um passo ou ignorar uma precondição, o resultado do teste perde a validade técnica, pois você não saberá se o erro foi do sistema ou da forma como você testou.</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. Visualizando o Fluxo Lógico de Execução:</h3>
+      <img src="img01.png" style="max-width: 90%; height:auto;">
+      </div>
+      
+      <div class="slide">
+      <h3>C. Exercícios Rápidos:</h3>
+      <ol>
+        <li>Escreva a precondição necessária para testar a funcionalidade "Excluir Produto" de um carrinho de compras.</li><br>
+        <li>Identifique o oráculo em um teste de transferência PIX.</li><br>
+        <li>Por que um teste que não acha defeitos não é considerado um teste de sucesso?</li><br>
+        <li>Cite um cenário real onde o uso de objetos "mock" (dados simulados) seria necessário.</li><br>
+        <li>Descreva 3 passos exatos para um caso de teste de recuperação de senha.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>Emprego de Ferramenta de Documentação de Teste</h2>
+      <h3>A. Conceito:</h3>
+      <p>Vamos explorar como as ferramentas de documentação transformam o caos de um projeto de software em uma estrutura organizada. Vamos seguir por esse conceito através de perguntas e exemplos práticos.</p>
+      <h3><b>O Repositório Central: O "Cérebro" do Projeto</b></h3>
+      <p>Imagine uma equipe de 20 pessoas testando um sistema bancário. Se cada um anotasse seus erros em planilhas individuais ou cadernos, como saberíamos o que já foi corrigido? Ferramentas como Jira ou TestLink funcionam como um Repositório Central. Elas garantem:</p>
+      <ul>
+        <li><b>Integridade:</b> Os dados não se perdem e não são alterados sem rastro.</li>
+        <li><b>Histórico:</b> Sabemos exatamente quem testou, quando testou e qual foi o erro encontrado.</li>
+        <li><b>Evidências:</b> Fotos e logs do sistema ficam guardados em um só lugar para provar que o teste foi feito.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3><b>A Rastreabilidade e a Matriz (RTM)</b></h3>
+      <p>O foco técnico é a Rastreabilidade. Pense nisso como um fio que conecta tudo:</p>
+      <ol>
+        <li>O Requisito: "O sistema deve aceitar pagamentos via PIX".</li>
+        <li>O Caso de Teste: "Tentar fazer um PIX de R$ 10,00".</li>
+        <li>O Resultado: "Sucesso ou Falha".</li>
+      </ol>
+      <p>A Matriz de Rastreabilidade (RTM) é a tabela que cruza essas informações. Se o cliente perguntar: "Vocês testaram a função de PIX?", você olha na matriz e mostra exatamente quais testes cobrem esse requisito. Isso permite calcular a DRE (Eficiência na Remoção de Defeitos), que é basicamente uma conta matemática para saber se pegamos a maioria dos erros antes do lançamento.</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. Visualizando a Matriz de Rastreabilidade (RTM) Simplificada:</h3>
+      <img src="img02.png" style="max-width: 90%; height:auto;">
+      </div>
+
+    <div class="slide">
+      <h3>C. Exercícios Rápidos:</h3>
+      <ol>
+        <li>O que significa a sigla RTM e para que ela serve?</li><br>
+        <li>Como uma ferramenta de documentação previne o "caos" em um projeto grande?</li><br>
+        <li>O que é rastreabilidade reversa (retroativa)?</li><br>
+        <li>Quais são as três perguntas que um Relatório de Status (CSR) precisa responder?</li><br>
+        <li>Se o requisito REQ-02 não tem nenhum caso de teste associado na ferramenta, qual problema de qualidade temos?</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>Identificação de Problemas Sistêmicos e Registro de Bugs (Bug Report)</h2>
+      <h3>A. Conceito:</h3>
+      <p>A identificação precisa de problemas sistêmicos exige que desenvolvamos nossa capacidade analítica para distinguir tecnicamente entre <b>Erro</b> (ação humana que originou o problema), <b>Defeito</b> (o dado incorreto presente no código) e <b>Falha</b> (a manifestação funcional desse defeito durante a execução). Quando detectamos a falha, entramos na fase de registro do bug.</p>
+      <p>O registro é o cadastro formal do defeito, cujo objetivo absoluto é fornecer ao desenvolvedor todas as informações necessárias para a reprodução fiel e correção da falha encontrada. O registro eficiente minimiza o retrabalho e evita o descontrole da qualidade no projeto.</p>
+    </div>
+
+    <div class="slide">
+    <h2>Identificação de Problemas Sistêmicos e Registro de Bugs (Bug Report)</h2>
+      <p>O foco central desta etapa é a Reprodutibilidade, pois a falha só será verdadeiramente corrigida se o programador conseguir simulá-la exatamente como ocorreu na máquina do testador. Um Bug Report técnico eficiente precisa de objetividade, passagens exatas para reprodução, taxonomia (como a categoria, severidade do impacto e prioridade de negócio), além de evidências visuais ou sistêmicas marcadas.</p>
+      <p>O ciclo de vida desse defeito transitará por diversos estados, como Aberto, Em andamento, Resolvido e Fechado, garantindo governança sobre a qualidade. Soft Skill importante: A redação do bug deve manter a Neutralidade, sendo baseada em fatos e sem carga emocional apontando dedos.</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. Visualizando o Ciclo de Vida do Defeito:</h3>
+         <img src="img03.png" style="max-width: 90%; height:auto;">
+    </div>
+    
+    <div class="slide">
+      <h3>C. Exemplo de Código:</h3>
+      <pre><code># Bug Report (Template Padrão SENAI)
+**Título:** Erro 500 ao enviar formulário com CEP vazio.
+**Categoria:** Interface/Validação | **Severidade:** Grave | **Prioridade:** Alta
+**Precondição:** Estar autenticado na tela de "Novo Endereço".
+**Passos para Reprodução:**
+1. Acessar a tela de cadastro de cliente.
+2. Preencher os campos "Nome" e "Rua", deixando "CEP" em branco.
+3. Clicar no botão "Salvar".
+**Resultado Esperado:** Sistema deve bloquear o envio e exibir "CEP obrigatório".
+**Resultado Obtido:** Sistema trava e exibe tela em branco com código HTTP 500.
+**Evidências:** [link-screenshot-log-console.png]</code></pre>
+    </div>
+
+    <div class="slide">
+      <h3>D. Explicação linha por linha do código:</h3>
+      <ul>
+        <li><b>Título:</b> Utiliza objetividade técnica sem ser vago ("o sistema quebrou").</li>
+        <li><b>Categoria/Severidade/Prioridade:</b> Aplica a Taxonomia do defeito para facilitar a triagem pela gerência do projeto.</li>
+        <li><b>Passos para Reprodução:</b> Oferece uma lista numerada exata, garantindo a reprodutibilidade vital para o desenvolvedor.</li>
+        <li><b>Esperado vs Obtido:</b> Confronto direto entre a especificação e a falha manifestada.</li>
+        <li><b>Evidências:</b> Anexo obrigatório (logs ou prints) para comprovar a falha tecnicamente.</li>
+      </ul>
+      </div>
+      
+      <div class="slide">
+      <h3>E. Exercícios Rápidos:</h3>
+      <ol>
+        <li>Diferencie Erro, Defeito e Falha no contexto de desenvolvimento de software.</li><br>
+        <li>O que significa garantir a "Reprodutibilidade" em um report de bug?</li><br>
+        <li>Qual a diferença entre Severidade e Prioridade de um bug?</li><br>
+        <li>Reescreva de forma técnica o seguinte relato amador: "A tela de cadastro tá horrível e apagou tudo do nada!".</li><br>
+        <li>Por que um defeito pode ser devolvido ao status de "Feedback" pelo desenvolvedor?</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>Validação e Comparação de Resultados de Testes</h2>
+      <h3>A. Conceito:</h3>
+      <p>Esta é a etapa crítica onde confrontamos o Resultado Obtido (o comportamento atual e visível do sistema) com o Resultado Esperado (nosso parâmetro de sucesso absoluto). É aqui que englobamos a Verificação ("Estamos criando o produto corretamente, seguindo as normas?") e a Validação ("Estamos criando o produto certo, que resolve a dor do usuário?").</p>
+      <p>O nosso objetivo principal nesta fase é a tomada de decisão concreta sobre o status do teste – Aprovado ou Reprovado – e garantir que o software construído satisfaça perfeitamente os critérios de aceite estabelecidos pelo cliente.</p>
+    </div>
+
+    <div class="slide">
+    <h2>Validação e Comparação de Resultados de Testes</h2>
+      <p>Como a realização de testes exaustivos cobrindo 100% dos cenários cósmicos é impossível, nossa validação foca de forma inteligente na conformidade com os requisitos funcionais, comportamentais e lógicos visíveis. A comparação técnica ocorre analisando saídas de texto, códigos HTTP de retorno e valores armazenados em banco. Se, durante um roteiro, o resultado obtido diferir do esperado, um defeito foi tecnicamente revelado (Reprovado). Se coincidirem em totalidade, o sistema está, até aquele momento, Aprovado na execução.</p>
+    </div>
+      
+    <div class="slide">
+      <h3>B. Visualizando a Matriz de Decisão de Teste:</h3>
+      <img src="img04.png" style="max-width: 90%; height:auto;">
+      </div>
+
+    <div class="slide">
+      <h3>C. Exemplo de Código:</h3>
+      <pre><code>// Exemplo de Verificação e Validação em um Teste Unitário (Jest)
+const calcularFrete = require('./sistemaFrete');
+
+test('Validação do Cálculo de Frete para Região Sul', () => {
+  // Precondição e Massa de Dados
+  const cepDestino = '89200-000'; // Joinville-SC
+  const pesoKg = 5;
+  const resultadoEsperado = 45.00; // Parâmetro de sucesso absoluto
+
+  // Ação gerando o Resultado Obtido
+  const resultadoObtido = calcularFrete(cepDestino, pesoKg);
+
+  // Validação e Comparação
+  expect(resultadoObtido).toBe(resultadoEsperado);
+});</code></pre>
+    </div>
+
+    <div class="slide">
+      <h3>D. Explicação linha por linha do código:</h3>
+      <ul>
+        <li><b>const calcularFrete = ...:</b> Importa a função (módulo) que passará pela verificação.</li>
+        <li><b>const cepDestino ... const pesoKg:</b> Definem a massa de dados que operará sobre o domínio de entrada.</li>
+        <li><b>resultadoEsperado = 45.00:</b> Estabelece o parâmetro que dirá se nossa validação foi aprovada ou não.</li>
+        <li><b>resultadoObtido = calcularFrete(...):</b> Captura a manifestação física do processamento lógico.</li>
+        <li><b>expect(resultadoObtido).toBe(resultadoEsperado):</b> Motor de comparação. Se diferir, o teste falha revelando o erro; se bater, é aprovado.</li>
+      </ul>
+      </div>
+      
+      <div class="slide">
+      <h3>E. Exercícios Rápidos:</h3>
+      <ol>
+        <li>Qual a diferença conceitual entre Verificação e Validação?</li><br>
+        <li>O que acontece imediatamente no projeto se o Resultado Obtido for diferente do Resultado Esperado?</li><br>
+        <li>O que são os Critérios de Aceitação?</li><br>
+        <li>Por que testes exaustivos são considerados inviáveis?</li><br>
+        <li>Dê um exemplo numérico simples (como em uma calculadora) que demonstre uma falha de validação.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p><b>1. PERGUNTA:</b> Achei um erro muito estranho, mas não consigo fazer ele acontecer de novo. Posso reportar mesmo assim?</p>
+      <p><b>RESPOSTA:</b> É complicado. Se você não garante a Reprodutibilidade detalhando os passos exatos, o desenvolvedor provavelmente marcará o bug como "Rejeitado" por não conseguir simular. Tente usar ferramentas de gravação de tela para capturar a evidência no momento da execução.</p>
+      </div>
+      
+      <div class="slide">
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p><b>2. PERGUNTA:</b> Qual ferramenta do mercado nós devemos usar para documentar testes?</p>
+      <p><b>RESPOSTA:</b> O mercado utiliza amplamente o Jira (com plugins como Zephyr ou Xray) e o TestLink (mais tradicional). O importante é o conceito por trás: manter o Repositório centralizado e a Rastreabilidade ativa.</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p><b>3. PERGUNTA:</b> Se o projeto está muito atrasado, podemos pular a documentação e só executar testes na interface?</p>
+      <p><b>RESPOSTA:</b> Não é recomendado. Pular a base documentada impede a análise da DRE (Eficiência na Remoção de Defeitos) e quebra a Pirâmide de Teste, gerando retrabalho futuro alto e problemas não mapeados. Priorize riscos, mas mantenha o registro base.</p>
+      </div>
+      
+      <div class="slide">
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p><b>4. PERGUNTA:</b> O desenvolvedor corrigiu o defeito. O que eu faço no sistema de bugs?</p>
+      <p><b>RESPOSTA:</b> O bug passa para o status de Verificando (Homologação). Você reexecuta exatamente os mesmos passos para garantir a eficácia da correção. Só depois dessa revalidação o defeito transita para Fechado.</p>
+      </div>
+    
+    <div class="slide">
+     <h2>FAQ - Dúvidas Reais</h2>
+      <p><b>5. PERGUNTA:</b> Como a IA Generativa (como o ChatGPT) pode ajudar o Engenheiro de Qualidade no dia a dia?</p>
+      <p><b>RESPOSTA:</b> Pode ser utilizada para apoiar na criação de "Massas de Teste" ricas e complexas, gerando dados como CPFs válidos para testes ou estruturas JSON de entradas complexas, além de revisar textos de Bug Reports, garantindo a neutralidade técnica.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Atividade Prática: Transformação e Registro de Defeitos</h2>
+      <p>A execução de testes é um processo dinâmico cujo objetivo não é provar que o software funciona, mas sim tentar quebrá-lo de forma estruturada para revelar falhas. Quando a validação falha – ou seja, o "Resultado Obtido" é diferente do "Resultado Esperado" – o teste é reprovado e exige a abertura imediata de um Bug Report.</p>
+      <p>Um Bug Report eficiente é a principal ferramenta de comunicação entre QA e Desenvolvimento. Ele exige reprodutibilidade exata, uso de taxonomia adequada (severidade e prioridade), e a aplicação da "Neutralidade" como soft skill, evitando apontamentos emocionais.</p>
+      <p>Abaixo, uma atividade prática avançada de Registro Cirúrgico de Bugs. O objetivo é que vocês transformem os "relatos brutos" (Cenários) abaixo em relatórios formais utilizando o Template Padrão SENAI. Trabalhem em equipe, mas a entrega é individual no AVA.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Instruções da Atividade:</h3>
+      <p>Para cada um dos 10 cenários brutos relatados abaixo, você deverá redigir um Bug Report formal contendo:</p>
+      <ul>
+        <li>Título (Objetivo e técnico)</li>
+        <li>Categoria | Severidade | Prioridade (Taxonomia)</li>
+        <li>Precondição (Estado inicial)</li>
+        <li>Passos para Reprodução (Lista numerada exata)</li>
+        <li>Resultado Esperado</li>
+        <li>Resultado Obtido</li>
+        <li>Evidências Sugeridas (Print, Log, etc.)</li>
+      </ul>
+      <p><b>Utilizem editores de texto (Google Docs) para redigir seus Bug Reports.</b></p>
+    </div>
+
+    <div class="slide">
+      <h3>Cenários para Registro:</h3>
+      <p><b>Caso 1: O Colapso do PIX (Baseado em Requisitos e Integração)</b></p>
+      <ul>
+        <li>Relato Bruto: "Fui testar a transferência PIX de R$ 50,00 que pediram. Entrei no app, botei a chave e cliquei em confirmar. O app fechou sozinho e não gerou comprovante nenhum."</li>
+        <li>Conexão com a Aula: Falha no oráculo de transação. Alta severidade e alta prioridade.</li>
+      </ul>
+      <p><b>Caso 2: A Falha Oculta na Regra de Negócio (Baseado na RTM)</b></p>
+      <ul>
+        <li>Relato Bruto: "O requisito R05 diz que pagamento no PIX tem 10% de desconto. Fui comprar um produto de R$ 100,00, escolhi PIX e o carrinho cobrou R$ 95,00."</li>
+        <li>Conexão com a Aula: Falha de Validação de dados e regras de negócio baseada na Matriz de Rastreabilidade. O obtido (5% de desconto) diferiu do esperado (10%).</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+    <h3>Cenários para Registro:</h3>
+      <p><b>Caso 3: O Relato Amador e Emocional (Soft Skill)</b></p>
+      <ul>
+        <li>Relato Bruto: "O sistema burro travou tudo e apagou meu login de novo na tela de cadastro, resolve isso rápido pelo amor de Deus!!"</li>
+        <li>Conexão com a Aula: Exige a aplicação de neutralidade técnica e objetividade para transformar um erro de perda de persistência de dados em um relato profissional.</li>
+      </ul>
+      <p><b>Caso 4: A API que Devolve o Vazio (Baseado em Automação/Oráculos)</b></p>
+      <ul>
+        <li>Relato Bruto: "Estava testando o serviço de clima. Mandei a requisição esperando que a temperatura voltasse 25 graus, mas o servidor devolveu {"status": 200, "temp": null} e a tela do app ficou com 'NaN°C'."</li>
+        <li>Conexão com a Aula: Confronto direto em testes de API e falha de validação lógica.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+    <h3>Cenários para Registro:</h3>
+      <p><b>Caso 5: O Sucesso Invisível (Defeito de Interface)</b></p>
+      <ul>
+        <li>Relato Bruto: "Eu clico em 'Salvar' no meu perfil. As informações vão pro banco de dados certinho, mas não aparece a mensagem verdinha dizendo 'Salvo com sucesso' que o manual manda ter."</li>
+        <li>Conexão com a Aula: Diferenciação entre defeito técnico (o banco salva) e falha de interface (requisito de UI não cumprido).</li>
+      </ul>
+      <p><b>Caso 6: A Fronteira da Idade (Análise de Valor Limite)</b></p>
+      <ul>
+        <li>Relato Bruto: "A regra do sistema diz que só aceita idades de 18 a 65 anos. Botei 17 anos no campo de idade, cliquei em avançar e ele deixou criar a conta normalmente."</li>
+        <li>Conexão com a Aula: Falha na massa de testes baseada em riscos e limites, permitindo violação de domínio.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+    <h3>Cenários para Registro:</h3>
+      <p><b>Caso 7: A Precondição Ignorada (Estado Inicial)</b></p>
+      <ul>
+        <li>Relato Bruto: "Entrei no carrinho de compras vazio e a lixeira de 'Excluir Produto' estava ativa. Cliquei nela e deu Erro 500 na tela toda."</li>
+        <li>Conexão com a Aula: A precondição para excluir um produto é ter um produto. O sistema falhou ao não tratar exceções de estado.</li>
+      </ul>
+      <p><b>Caso 8: O Intermitente (Problema de Reprodutibilidade)</b></p>
+      <ul>
+        <li>Relato Bruto: "As vezes, quando eu clico no botão de 'Curtir' na rede social, o coraçãozinho não fica vermelho. Acontece 1 vez a cada 10 tentativas. Não sei explicar direito."</li>
+        <li>Conexão com a Aula: O maior desafio da triagem. Exigirá gravação de tela, logs do console e passos altamente detalhados para não ser devolvido com status de "Feedback".</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+    <h3>Cenários para Registro:</h3>
+      <p><b>Caso 9: O Loop da Senha (Fluxo Lógico Quebrado)</b></p>
+      <ul>
+        <li>Relato Bruto: "Pedi pra recuperar a senha. Chegou o e-mail. Eu clico no link do e-mail pra botar a senha nova, mas ele me joga de volta pra tela de 'Esqueci minha senha' de novo."</li>
+        <li>Conexão com a Aula: O roteiro de 3 passos de recuperação de senha falhou na etapa de redirecionamento do Oráculo de segurança.</li>
+      </ul>
+      <p><b>Caso 10: O Paradoxo Severidade vs. Prioridade</b></p>
+      <ul>
+        <li>Relato Bruto: "O sistema funciona inteiro, nada trava. Mas na página inicial, o nome da nossa empresa 'TechCorp' está escrito 'TecCrap' em letras garrafais vermelhas."</li>
+        <li>Conexão com a Aula: Perfeito para o aluno exercitar que um bug de Severidade Baixa (não quebra funcionalidades) pode ter Prioridade Máxima (impacto absurdo de imagem e negócio).</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Fechamento</h2>
+      <p>Nesta aula, internalizamos como transformar o planejamento metódico em operação real. Esta execução rigorosa de rotinas e o registro cirúrgico de Bugs no fluxo de documentação serão o pilar central da nossa Situação de Aprendizagem. Nela, vocês atuarão como a equipe de QA auditando e validando as entregas de código uns dos outros, sendo avaliados pela qualidade dos reports e pela rastreabilidade que implementarem.</p>
+      </div>
+      
+    <div class="slide">
+      <h2>Próxima Aula</h2>
+      <p>Na nossa próxima aula, subiremos mais um nível de maturidade e entenderemos a Pirâmide de Testes e Estratégias de Automação Contínua (CI/CD). Entenderemos como robôs garantem a regressão dos defeitos que reportamos hoje, reduzindo custos e maximizando a segurança do software em entregas ágeis.</p>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+  </script>
+</body>
+</html>
