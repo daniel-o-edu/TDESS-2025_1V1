@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 09 - Testes Exploratórios e Identificação de Problemas</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 85vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 80vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 26px; 
+    line-height: 1.6; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 22px;
+    overflow-x: auto;
+  }
+  .controls {
+    height: 90px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px;
+    font-size: 22px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+    cursor: not-allowed; 
+  }
+  .progress { 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #495057;
+  }
+  
+  /* Classes Adicionais do Prompt Avançado */
+  .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 20px; letter-spacing: 1px; }
+  .cover-desc { font-size: 28px; }
+  .divider { border: 0; border-top: 2px solid #dee2e6; margin: 30px 0; }
+  .topics-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+  .topic-chip { background: #e9ecef; padding: 10px 20px; border-radius: 50px; font-size: 20px; }
+  .cover-meta { color: #adb5bd; font-size: 18px; }
+  
+  .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+  .callout-title { font-weight: bold; margin-bottom: 10px; font-size: 24px; }
+  .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+  .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+  .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+  .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+  
+  .two-col { display: flex; gap: 40px; }
+  .col-card { flex: 1; background: #f8f9fa; padding: 30px; border-radius: 8px; border: 1px solid #dee2e6; }
+  
+  .code-block { margin: 20px 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; }
+  th { background: #e9ecef; color: #495057; font-weight: bold; }
+  
+  .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+  .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+  .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+
+    <div class="slide active">
+      <div class="slide-label">Aula 09</div>
+      <h1>Testes Exploratórios e Identificação de Problemas</h1>
+      
+      <p class="cover-desc">
+        Descrição: Aplicação de metodologias de testes exploratórios (heurísticas) para identificar falhas não mapeadas. Introdução à automação e design robusto de software com TDD (Red-Green-Refactor), Padrão AAA e o framework Pytest, visando isolamento e previsibilidade no código.
+      </p>
+      
+      <hr class="divider">
+      
+      <h3>Tópicos desta aula</h3>
+      <div class="topics-grid">
+        <div class="topic-chip">Testes Exploratórios</div>
+        <div class="topic-chip">Error Guessing</div>
+        <div class="topic-chip">TDD</div>
+        <div class="topic-chip">Padrão AAA</div>
+        <div class="topic-chip">Pytest</div>
+      </div>
+      
+      <div class="cover-meta">
+        <span>Engenharia de Software e Qualidade</span>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Contextualização</div>
+      <h2>Cenário Real</h2>
+      <p>O mercado ágil de desenvolvimento não perdoa a lentidão nem a falta de qualidade.</p>
+      <p>Imagine que nossa equipe acabou de lançar um aplicativo de e-commerce durante a Black Friday. Os roteiros tradicionais de testes passaram com sucesso, mas, logo na primeira hora, usuários reais descobrem que ao "clicar rapidamente e duas vezes" no botão de compra, o frete fica zerado.</p>
+      <p>Os roteiros fixos e mecânicos não pegaram essa falha. É nesse momento de caos que entra a intuição afiada de um testador utilizando Testes Exploratórios guiados por heurísticas e, posteriormente, a segurança inabalável de testes automatizados com TDD para garantir que esse erro nunca mais retorne.</p>
+      <p>Hoje, nós vamos unir a criatividade investigativa de um "hacker" com o rigor de um engenheiro de software.</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout yellow">
+        <div class="callout-title">Pergunta</div>
+        <p>Vocês já conseguiram quebrar um jogo ou encontrar um bug em um aplicativo simplesmente porque começaram a apertar os botões fora da ordem lógica esperada pela tela? Como foi essa experiência?</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <h2>Testes Exploratórios e Descoberta de Erros (Error Guessing)</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 01</div>
+      <h2>A. Conceito</h2>
+      <p>Vamos decompor esses conceitos para que fiquem ainda mais claros. Imagine que testar um software é como explorar uma caverna desconhecida: você pode seguir um mapa rígido ou pode usar sua intuição de explorador para encontrar passagens secretas.</p>
+      <p>Aqui está uma explicação didática dividida em três pilares:</p>
+    </div>
+
+    <div class="slide">
+      <h2>Teste Exploratório: O "Voo Livre" Estruturado</h2>
+      <p>Diferente dos testes tradicionais, onde você segue uma "receita de bolo" (script), no Teste Exploratório você é o autor e o executor ao mesmo tempo.</p>
+      <ul>
+        <li><strong>O Ciclo Simultâneo:</strong> Enquanto você clica em um botão, você está aprendendo como ele reage, planejando o próximo passo e executando o teste. Tudo acontece em frações de segundo na sua mente.</li>
+        <li><strong>Por que funciona?</strong> Em projetos ágeis, o software muda muito rápido. Se fôssemos escrever manuais para cada pequena mudança, o software já estaria obsoleto antes do teste acabar. A exploração traz agilidade.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Error Guessing: O "Faro" do Testador</h2>
+      <p>O Error Guessing (Descoberta de Erro) é a nossa "bola de cristal" baseada em fatos. Não é um chute aleatório; é um palpite educado.</p>
+      <p>Sabe quando você olha para um formulário e pensa: "Certo, se eu colar um texto de 50 parágrafos aqui, esse sistema vai travar"? Isso é Error Guessing. Você usa:</p>
+      <ul>
+        <li><strong>Experiência:</strong> "No último projeto, campos de data sempre davam erro no ano bissexto."</li>
+        <li><strong>Heurísticas:</strong> Atalhos mentais para focar onde o perigo mora.</li>
+        <li><strong>Casos de Borda:</strong> Em vez de testar o óbvio (o "caminho feliz"), você testa os extremos.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Casos de Borda</h2>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Caminho Feliz</th>
+            <th>Error Guessing (Casos de Borda)</th>
+          </tr>
+          <tr>
+            <td>Digitar um nome comum.</td>
+            <td>Deixar o campo vazio ou usar emojis.</td>
+          </tr>
+          <tr>
+            <td>Comprar 1 item no carrinho.</td>
+            <td>Tentar comprar -1 item ou 999.999 itens.</td>
+          </tr>
+          <tr>
+            <td>Clicar em "Salvar" uma vez.</td>
+            <td>Clicar em "Salvar" dez vezes seguidas bem rápido.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>O Fator Humano: Curiosidade e Crítica</h2>
+      <p>O que diferencia um robô de um testador exploratório são as Soft Skills:</p>
+      <ul>
+        <li><strong>Pensamento Analítico:</strong> Não apenas ver que deu erro, mas tentar entender por que deu erro.</li>
+        <li><strong>Curiosidade:</strong> É o famoso "e se?". "E se eu desligar o Wi-Fi bem na hora que o pagamento estiver processando?"</li>
+        <li><strong>Adaptabilidade:</strong> Se você descobre algo estranho em uma tela, você tem a liberdade de mudar seu plano de teste na hora para investigar aquele "fio solto".</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">Resumindo</div>
+        <p>O Teste Exploratório é a estratégia de navegar pelo sistema com liberdade, enquanto o Error Guessing é a ferramenta mental que nos diz onde cavar para encontrar os bugs mais escondidos.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>B. Visualizando</h2>
+      <img src="img01.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. Exemplo de Código</h2>
+      <p>Embora exploratório seja muito "manual", nós usamos scripts simples para automatizar o Error Guessing. Python</p>
+      <div class="code-block">
+<pre><code># Simulador de Error Guessing em uma função de divisão de preços
+def calcular_parcela(preco_total, numero_parcelas):
+    if numero_parcelas <= 0:
+        raise ValueError("Número de parcelas deve ser maior que zero.")
+    return round(preco_total / numero_parcelas, 2)
+
+# Script rápido para injetar valores bizarros (Testando heurísticas)
+casos_de_borda = [
+    (1000.0, 0), # Divisão por zero
+    (-50.0, 2), # Preço negativo
+    (999999999999, 12), # Valor absurdamente alto
+    (100.0, -5) # Parcelas negativas
+]</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>for preco, parcela in casos_de_borda:
+    try:
+        resultado = calcular_parcela(preco, parcela)
+        print(f"Sucesso: {preco} em {parcela}x = {resultado}")
+    except Exception as e:
+        print(f"Falha capturada (Esperada ou Bug!): {e}")</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout green">
+        <div class="callout-title">D. Responda:</div>
+        <ol>
+          <li>Cite duas situações que você adicionaria à lista casos_de_borda.</li>
+          <li>Como o teste exploratório difere de seguir um plano de testes?</li>
+          <li>O que acontece com o código de exemplo se enviarmos uma string no lugar do preço?</li>
+          <li>Qual é o papel da "experiência" na técnica de error guessing?</li>
+          <li>Como você usaria IA Generativa para te dar ideias de casos de borda? E quais os riscos éticos de colocar código proprietário da empresa no prompt da IA?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <h2>TDD e o Ciclo Red-Green-Refactor</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 02</div>
+      <h2>A. Conceito</h2>
+      <p>TDD (Test-Driven Development), ou Desenvolvimento Orientado a Testes, é como construir uma casa começando pela planta e pela inspeção, antes de colocar o primeiro tijolo.</p>
+      <p>Em vez de escrever o código e depois rezar para que ele funcione, você define o que é o "sucesso" antes de começar.</p>
+      <p>Aqui está o detalhamento desse ciclo que transforma a forma como escrevemos software:</p>
+    </div>
+
+    <div class="slide">
+      <h2>O Mantra: Red-Green-Refactor</h2>
+      <p>Imagine que você é um artesão. O TDD garante que cada peça que você produz seja testada individualmente antes de ser montada no conjunto.</p>
+      <p>Esse processo ocorre em três etapas cíclicas:</p>
+      <h3>1°. Red (Vermelho)</h3>
+      <p>Nesta etapa, você escreve um teste para uma funcionalidade que ainda não existe.</p>
+      <p>O objetivo: O teste deve falhar. Por que fazer isso? Para garantir que o teste realmente funciona e que ele não está passando por "acidente". Isso prova que existe um requisito que o sistema ainda não atende.</p>
+    </div>
+
+    <div class="slide">
+      <h3>2°. Green (Verde)</h3>
+      <p>Agora, você escreve o código da funcionalidade. Mas atenção: a regra aqui é o minimalismo.</p>
+      <p>O objetivo: Fazer o teste passar o mais rápido possível.</p>
+      <p>O "Código Feio": Não se preocupe com elegância, performance ou arquitetura perfeita agora. Se o teste pede que uma função some 2+2, e você escrever return 4, o teste passará. O foco é sair da zona de falha.</p>
+    </div>
+
+    <div class="slide">
+      <h3>3°. Refactor (Refatorar)</h3>
+      <p>Com o teste brilhando em verde (sucesso), você tem uma rede de segurança para melhorar o que fez.</p>
+      <p>O objetivo: Limpar o código, remover duplicidades, melhorar nomes de variáveis e aplicar padrões de projeto.</p>
+      <ul>
+        <li><strong>A Segurança:</strong> Como o teste já existe, se você "fizer bobagem" enquanto limpa o código, o teste ficará vermelho imediatamente, avisando que você quebrou algo.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Por que mudar a mentalidade?</h2>
+      <p>Muitos desenvolvedores sentem a tentação de pular direto para o código. No entanto, o TDD oferece vantagens estratégicas:</p>
+      <ul>
+        <li><strong>Design Emergente:</strong> Você é forçado a pensar em como a função será usada antes de como ela será escrita. Isso gera interfaces mais simples e intuitivas.</li>
+        <li><strong>Documentação Viva:</strong> Os testes são o melhor manual de instruções que existe. Eles mostram exatamente o que o código deveria fazer em cada cenário.</li>
+        <li><strong>Fim do Medo:</strong> Sabe aquele medo de alterar um código antigo e "quebrar o sistema inteiro"? Com TDD, se você quebrar algo, um alerta vermelho acende na hora.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="callout yellow">
+        <div class="callout-title">Analogia Prática:</div>
+        <p>É como um GPS. Primeiro você diz para onde quer ir (Red), o GPS traça a rota mais rápida, mesmo que seja por ruas apertadas (Green), e depois você decide se quer ajustar o caminho para passar por uma estrada mais bonita ou evitar pedágios (Refactor).</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>B. Visualizando:</h2>
+      <img src="img02.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. Exemplo de Código:</h2>
+      <p>Usando pytest para seguir o TDD na criação de um validador de cupons. Python</p>
+      <div class="code-block">
+<pre><code>import pytest
+
+# 1. RED: Escrevemos este teste primeiro!
+def test_deve_aceitar_cupom_valido_com_espacos_e_minusculo():
+    # Passamos um dado bagunçado para forçar a regra de negócio
+    resultado = validar_cupom(" senai20 ")
+    assert resultado is True
+
+# 2. GREEN: O código simples que faz o teste passar
+def validar_cupom (cupom):
+    # 3. REFACTOR: Melhorando o código sem quebrar o teste verde
+    cupons_validos = ["SENAI20", "PROMO10"]
+    return cupom.upper().strip() in cupons_validos</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout green">
+        <div class="callout-title">D. Responda:</div>
+        <ol>
+          <li>Qual é o perigo de pular o passo "Red" e ir direto para a codificação da funcionalidade?</li>
+          <li>Por que o passo "Refactor" é considerado o momento de cuidar da qualidade do código?</li>
+          <li>O que significa quando um teste TDD falha antes de você mexer no código de produção?</li>
+          <li>Pense e responda, qual seria a assinatura do teste para validar um cupom vencido?</li>
+          <li>Como o TDD ajuda os membros do time a entenderem como usar a função que você criou?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <h2>Isolamento e Anatomia do Teste (Padrão AAA)</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 03</div>
+      <h2>A. Conceito</h2>
+      <p>Para que um teste seja confiável, ele precisa ser como um experimento de laboratório: isolado de influências externas e organizado para que qualquer pessoa entenda o que está sendo testado.</p>
+      <p>Vamos entender por que o isolamento é vital e como o padrão AAA coloca ordem na casa.</p>
+    </div>
+
+    <div class="slide">
+      <h2>O Problema do "Vizinho Barulhento" (Isolamento)</h2>
+      <p>Imagine que você tem dois testes: o Teste A cria um usuário e o Teste B deleta um usuário. Se o Teste B rodar antes do Teste A, ele pode tentar deletar algo que ainda não existe e falhar. Isso é um teste instável (flaky test).</p>
+      <ul>
+        <li><strong>Independência:</strong> Um teste nunca deve precisar que outro teste passe primeiro.</li>
+        <li><strong>Limpeza:</strong> Se o teste criou um dado no banco, ele (ou o sistema) deve apagar esse dado ao terminar. O próximo teste deve encontrar um "campo limpo".</li>
+        <li><strong>Determinismo:</strong> Se você rodar o teste 1.000 vezes, o resultado deve ser o mesmo em todas elas.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 03</div>
+      <h2>A Anatomia do Teste: O Padrão AAA (Continuação)</h2>
+      <h3>Arrange (Preparar)</h3>
+      <p>É aqui que você "monta o palco". Você prepara tudo o que o teste precisa para rodar.</p>
+      <ul>
+        <li><strong>O que acontece:</strong> Define variáveis, cria objetos, prepara o banco de dados e define os dados de entrada.</li>
+        <li><strong>Exemplo:</strong> "Vou testar uma calculadora. Primeiro, eu instancio a calculadora e defino os números 5 e 10."</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 03</div>
+      <h2>A Anatomia do Teste: O Padrão AAA</h2>
+      <h3>Act (Agir)</h3>
+      <p>É o momento da ação principal. Você executa a funcionalidade que quer testar.</p>
+      <ul>
+        <li><strong>O que acontece:</strong> Geralmente é uma única linha de código. É o gatilho.</li>
+        <li><strong>Exemplo:</strong> "Eu mando a calculadora somar os dois números."</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 03</div>
+      <h2>A Anatomia do Teste: O Padrão AAA</h2>
+      <h3>Assert (Verificar)</h3>
+      <p>É a hora da verdade. Você compara o resultado obtido com o resultado esperado.</p>
+      <ul>
+        <li><strong>O que acontece:</strong> O teste faz uma pergunta: "O resultado foi 15?". Se sim, o teste passa. Se não, ele falha.</li>
+        <li><strong>Exemplo:</strong> "Verifico se o retorno da soma é igual a 15."</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 03</div>
+      <h2>Por que isso é importante?</h2>
+      <p>Seguir essa anatomia transforma o código do teste em uma documentação técnica.</p>
+      <ul>
+        <li><strong>Manutenção fácil:</strong> Se um teste falhar, você sabe exatamente se o problema foi na preparação dos dados (Arrange), na execução da lógica (Act) ou se o resultado apenas veio diferente do esperado (Assert).</li>
+        <li><strong>Leitura rápida:</strong> Qualquer desenvolvedor novo na equipe consegue ler o teste e entender o cenário em segundos, sem precisar decifrar uma "sopa de letrinhas".</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="callout yellow">
+        <div class="callout-title">Dica de Ouro:</div>
+        <p>Se o seu bloco Act estiver ficando muito grande ou com muitas ações, talvez você esteja tentando testar coisas demais em um único teste. O ideal é: <strong>Um objetivo por teste.</strong></p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>B. Visualizando:</h2>
+      <img src="img03.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. Exemplo de Código:</h2>
+      <p>Python</p>
+      <div class="code-block">
+<pre><code>def aplicar_desconto(valor_carrinho, valor_desconto):
+    return max(0, valor_carrinho - valor_desconto)
+#Uma função que retira um valor do total, limitando a zero para não dar saldo negativo.
+
+def test_aplicar_desconto_nao_deve_resultar_em_valor_negativo():
+    # ARRANGE (Delimitador visual organizando o pensamento.)
+    carrinho_atual = 50.0
+    cupom_gigante = 200.0
+    valor_esperado = 0
+    
+    # ACT (Momento da ação única e objetiva.)
+    resultado = aplicar_desconto(carrinho_atual, cupom_gigante)
+    
+    # ASSERT (A checagem da verdade.)
+    assert resultado == valor_esperado</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout green">
+        <div class="callout-title">D. Responda:</div>
+        <ol>
+          <li>Por que é uma má prática ter mais de um "Act" (chamadas a diferentes métodos principais) no mesmo teste?</li>
+          <li>Como o padrão AAA facilita encontrar o defeito quando um colega lê seu código meses depois?</li>
+          <li>Oque ocorre se modificar o código do Arrange para testar um carrinho de 100.0 com desconto de 20.0.?</li>
+          <li>O que é um teste Flaky e como o isolamento de dados do "Arrange" resolve isso?</li>
+          <li>Explique a relação do TDD com o padrão AAA. Eles podem (ou devem) ser usados juntos?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">FAQ</div>
+        <h2>Dúvidas Reais</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ - Dúvidas Reais</div>
+      <div class="callout blue">
+        <p><strong>Pergunta:</strong> No dia a dia da empresa, não tem tempo para TDD. O que eu faço?</p>
+        <p><strong>Resposta:</strong> A pressa é inimiga do código sustentável. Você pode negociar prazos mostrando que testes não são "trabalho extra", mas sim prevenção de bugs que parariam o servidor de produção à noite. Use as heurísticas para priorizar e automatizar primeiramente o "núcleo de negócio" vital.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ - Dúvidas Reais</div>
+      <div class="callout yellow">
+        <p><strong>Pergunta:</strong> Teste exploratório exige documentação pesada?</p>
+        <p><strong>Resposta:</strong> Não! Em vez de escrever centenas de casos de uso (planilhas fixas), usamos sessões focadas e documentamos apenas os "Mapas Mentais" e os bugs críticos encontrados (por meio de ferramentas de registro de defeito).</p>
+      </div>
+      <div class="callout green">
+        <p><strong>Pergunta:</strong> O Pytest é melhor que a biblioteca unittest nativa do Python?</p>
+        <p><strong>Resposta:</strong> Ambos resolvem o problema, mas a adoção do Pytest pela indústria se deve à sua simplicidade (uso direto do assert), falta de necessidade de criar classes complexas para testes simples, e o poder das fixtures no isolamento do código.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ - Dúvidas Reais</div>
+      <div class="callout blue">
+        <p><strong>Pergunta:</strong> Como a Inteligência Artificial pode me ajudar no TDD?</p>
+        <p><strong>Resposta:</strong> A IA é uma aliada formidável na criação da massa de dados (o Arrange). Você pode pedir para IA: "Gere 10 exemplos de JSON de entrada mal formatada para minha API". A ressalva ética: nunca envie credenciais reais de banco ou chaves de segurança da sua empresa no prompt.</p>
+      </div>
+      <div class="callout red">
+        <p><strong>Pergunta:</strong> Meus testes estão instáveis (Passam na minha máquina, mas falham no servidor). Onde olho?</p>
+        <p><strong>Resposta:</strong> Isso é um alerta vermelho de vazamento de estado (flaky test). Revise o isolamento (o padrão AAA): certifique-se de que nenhum teste depende do banco de dados deixado sujo pelo teste anterior e se certifique de que não está dependendo da data e hora real do sistema operacional.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <h2>Exercícios de Fixação</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Exercícios de Fixação</div>
+      <h2>Como fazer:</h2>
+      <p><strong>Descrição:</strong> A realização do exercício pode ser feita como seus colegas, mas a entrega é <b>individual</b> e deve ser feita hoje no AVA.</p>
+      <h3> Os exercícios estão no material em <b>pdf</b></h3>
+      </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <h2>Fechamento</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Fechamento</div>
+      <h2>Conexão com a SA</h2>
+      <p>Todos os tópicos abordados hoje convergem diretamente para a nossa SA. Nas nossas documentações de planejamento e no momento de diagnosticar correções no software, vocês não dependerão de tentar "adivinhar na sorte" onde estão os defeitos.</p>
+      <p>A documentação gerada pelos métodos exploratórios validará os requisitos de robustez do sistema que vocês desenvolverão, e os scripts construídos em TDD formarão as evidências para a entrega final de que o software tem um "padrão de desempenho e eficiência" em conformidade técnica.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Próxima Aula</div>
+      <h2>Conexão com a Próxima Aula:</h2>
+      <p>Se hoje focamos na metodologia e anatomia lógica (o cérebro do teste e como isolá-lo), na nossa próxima aula nós mergulharemos na avaliação das características não funcionais do sistema, verificando usabilidade, experiência do usuário e critérios de segurança e performance.</p>
+      
+      <div class="callout blue">
+        <div class="callout-title">Vamos trabalhar:</div>
+        <ul>
+          <li>Testes Não Funcionais (Performance, Carga, Estresse),</li>
+          <li>Testes de Usabilidade e Acessibilidade Digital (UX) e os</li>
+          <li>Fundamentos de Segurança da Informação nos testes.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+  </script>
+</body>
+</html>
