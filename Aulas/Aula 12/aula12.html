@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 12 - Auditoria Híbrida: Performance, Acessibilidade e Usabilidade</title>
+    <style>
+        body {
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa; 
+            color: #212529;
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            overflow: hidden;
+        }
+        .slide-container {
+            width: 95vw;
+            height: 85vh;
+            margin: auto;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            padding: 20px; 
+            box-sizing: border-box; 
+            position: relative;
+        }
+        .slide {
+            display: none; 
+            width: 100%; 
+            max-width: 1200px; 
+            height: 80vh;
+            background: #ffffff; 
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            padding: 50px;
+            font-size: 24px; 
+            line-height: 1.5; 
+            overflow-y: auto;
+        }
+        .slide.active { 
+            display: block; 
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1, h2, h3 { 
+            color: #6f42c1; 
+            margin-top: 0; 
+        }
+        code, pre { 
+            background: #f1f3f5; 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            font-family: 'Courier New', Courier, monospace; 
+            display: block; 
+            font-size: 18px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-left: 4px solid #6f42c1;
+        }
+        .controls {
+            height: 80px; 
+            background: #ffffff; 
+            border-top: 1px solid #dee2e6;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0 50px;
+        }
+        button {
+            background: #6f42c1; 
+            color: white; 
+            border: none; 
+            padding: 12px 25px;
+            font-size: 18px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #5a32a3;
+        }
+        button:disabled { 
+            background: #adb5bd; 
+            cursor: not-allowed; 
+        }
+        .progress { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #495057;
+        }
+        .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+        .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+        .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+        .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+        .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+        .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+        .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+        .section-header h2 { font-size: 48px; color: #6f42c1; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 20px; }
+        table th, table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        table th { background-color: #f1f3f5; }
+    </style>
+</head>
+<body>
+    <div class="slide-container" id="slides">
+
+        <div class="slide active">
+            <div class="slide-label">Aula 12</div>
+            <h1>Auditoria Híbrida: Performance, Acessibilidade e Usabilidade</h1>
+            <p><strong>Descrição:</strong> Esta aula ensina a diferenciar auditoria automatizada de testes manuais, capacitando o aluno a interpretar métricas de Core Web Vitals e WCAG.</p>
+            <div class="callout blue">
+                <p>Através de dinâmicas práticas e testes de "guerrilha", você aprenderá a identificar falhas que algoritmos não detectam, aplicando as Heurísticas de Nielsen para criar soluções que unem rigor técnico e empatia com o usuário.</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="section-header">
+                <div class="section-num">01</div>
+                <h2>Acessibilidade e o Padrão WCAG</h2>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Acessibilidade e WCAG</div>
+            <h2>Acessibilidade e o Padrão WCAG</h2>
+            <p>A acessibilidade digital, orientada pelas diretrizes WCAG (Web Content Accessibility Guidelines), busca garantir que a web seja inclusiva.</p>
+            <p>O Google Lighthouse utiliza essas diretrizes (especialmente a versão 2.x nível AA) como referência para avaliar a interface através da engine axe-core.</p>
+            <h3>Auditoria Automática com Lighthouse</h3>
+            <p>O Lighthouse realiza uma varredura no DOM renderizado para identificar violações de código e marcação.</p>
+            <ul>
+                <li><strong>Cálculo da Nota:</strong> A ferramenta atribui uma pontuação de 0 a 100, baseada em uma média ponderada de auditorias individuais.</li>
+                <li><strong>Critério Binário:</strong> Não há crédito parcial; a auditoria para cada item é classificada apenas como "pass" (passou) ou "fail" (falhou).</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Auditoria Automática</div>
+            <h3>Erros Óbvios Detectados:</h3>
+            <ul>
+                <li><strong>Falta de Atributo alt:</strong> Verifica se imagens relevantes possuem texto alternativo para descrever seu conteúdo.</li>
+                <li><strong>Baixo Contraste:</strong> Analisa se há contraste suficiente entre a cor do texto e o plano de fundo.</li>
+                <li><strong>Falta de Labels:</strong> Confere se campos de formulário possuem rótulos associados e se botões ou links têm nomes acessíveis.</li>
+                <li><strong>Erros de Estrutura:</strong> Identifica IDS ARIA duplicados e se a hierarquia de cabeçalhos (h1-h6) segue uma lógica coerente.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="section-header">
+                <div class="section-num">02</div>
+                <h2>Auditoria Manual: Onde o Humano é Essencial</h2>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Auditoria Manual</div>
+            <p>Embora o Lighthouse seja eficiente, ele cobre apenas um subconjunto de critérios automatizáveis. A validação manual é obrigatória para garantir uma experiência real de uso.</p>
+            <h3>Navegação por Teclado:</h3>
+            <ul>
+                <li><strong>Funcionalidade:</strong> É necessário testar manualmente se o usuário consegue navegar por todos os elementos sem o uso do mouse.</li>
+                <li><strong>Indicadores Visuais:</strong> A auditoria manual garante que o fluxo de navegação seja intuitivo e que o usuário identifique onde está na página.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Auditoria Manual</div>
+            <h3>Leitores de Tela:</h3>
+            <ul>
+                <li><strong>Qualidade do Conteúdo:</strong> Uma ferramenta automática pode detectar que um campo tem um rótulo, mas não se o texto é realmente descritivo.</li>
+                <li><strong>Sentido Lógico:</strong> Testes de usabilidade com tecnologia assistiva são fundamentais para garantir que o conteúdo lido faça sentido para quem não enxerga, evitando "falsos negativos" onde o código está correto, mas a informação é pobre.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="section-header">
+                <div class="section-num">03</div>
+                <h2>Métricas de Interface e UX (Core Web Vitals)</h2>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Core Web Vitals</div>
+            <p>O Lighthouse utiliza o conjunto de métricas Core Web Vitals para avaliar a qualidade da experiência da página, simulando condições de laboratório (rede e CPU limitadas).</p>
+            <h3>Largest Contentful Paint (LCP)</h3>
+            <p>O LCP foca na velocidade de carregamento percebida.</p>
+            <ul>
+                <li><strong>O que mede:</strong> O tempo necessário para carregar o maior elemento de conteúdo visível na tela (como uma imagem hero, um banner ou um bloco de texto grande).</li>
+                <li><strong>O que afeta negativamente:</strong> Imagens muito pesadas, resposta lenta do servidor e recursos (como CSS) que bloqueiam o carregamento do elemento principal.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">LCP - Remediação</div>
+            <div class="callout blue">
+                <h3>Estratégias de Remediação LCP:</h3>
+                <ul>
+                    <li>Servir imagens otimizadas em formatos modernos (WebP/AVIF).</li>
+                    <li>Usar lazy-loading apenas para conteúdos abaixo da dobra da página.</li>
+                    <li>Pré-carregar recursos críticos (como a imagem principal do topo).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Core Web Vitals</div>
+            <h3>Cumulative Layout Shift (CLS)</h3>
+            <p>O CLS avalia a estabilidade visual da interface.</p>
+            <ul>
+                <li><strong>O que mede:</strong> A soma de todos os deslocamentos inesperados de layout enquanto a página carrega.</li>
+                <li><strong>O que causa frustração:</strong> Elementos que "pulam" de posição (devido a anúncios injetados ou imagens sem tamanho definido), fazendo o usuário clicar no lugar errado.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">CLS - Remediação</div>
+            <div class="callout red">
+                <h3>Estratégias de Remediação CLS:</h3>
+                <ul>
+                    <li>Sempre definir largura (width) e altura (height) ou a proporção (aspect-ratio) em imagens e iframes.</li>
+                    <li>Reservar espaço prévio para componentes dinâmicos, como banners e widgets.</li>
+                    <li>Evitar a inserção de novos conteúdos acima de elementos que já foram carregados.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Diagnóstico e Priorização</div>
+            <h3>Diagnóstico e Priorização</h3>
+            <p>Para melhorar essas métricas, o relatório do Lighthouse oferece seções específicas de remediação:</p>
+            <ul>
+                <li><strong>Opportunities (Oportunidades):</strong> Lista sugestões técnicas ordenadas pelo impacto estimado no tempo de carregamento (ex: compressão de texto, otimização de bundles de JavaScript).</li>
+                <li><strong>Diagnostics (Diagnósticos):</strong> Detalha o comportamento da página, como o tamanho do DOM e o trabalho excessivo na main thread (fio principal de execução).</li>
+            </ul>
+            <div class="callout yellow">
+                <p><strong>Regra de Ouro:</strong> Deve-se priorizar primeiro as correções que influenciam diretamente o LCP e o TBT (Total Blocking Time), seguidas pela estabilidade visual do CLS.</p>
+            </div>
+            <p>Embora o Lighthouse forneça dados valiosos em ambiente de desenvolvimento (laboratório), os especialistas recomendam combiná-lo com o RUM (Real User Monitoring) para monitorar como os usuários reais experimentam o site em produção.</p>
+        </div>
+
+        <div class="slide">
+            <div class="section-header">
+                <div class="section-num">04</div>
+                <h2>Fundamentos e Prática da Usabilidade</h2>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Usabilidade</div>
+            <p>A usabilidade não é apenas um "sentimento", mas uma metodologia rigorosa de observação para descobrir problemas e oportunidades em interfaces. Mesmo os melhores designers não conseguem prever todas as variáveis do cérebro humano sem testar com usuários reais.</p>
+        </div>
+ 
+        <div class="slide">
+            <div class="slide-label">Usabilidade</div>
+            <h3>Os 5 Componentes da Usabilidade (Nielsen)</h3>
+            <p>Para medir a facilidade de uso de uma interface, analisamos cinco pilares fundamentais:</p>
+            <ul>
+                <li><strong>Aprendizagem (Learnability):</strong> Quão fácil é para os usuários realizarem tarefas básicas na primeira vez que encontram o design?</li>
+                <li><strong>Eficiência (Efficiency):</strong> Uma vez que os usuários aprenderam o design, quão rápido eles podem realizar as tarefas?</li>
+                <li><strong>Memorização (Memorability):</strong> Quando os usuários retornam ao design após um período sem usá-lo, com que facilidade eles podem restabelecer a proficiência?</li>
+                <li><strong>Erros (Errors):</strong> Quantos erros os usuários cometem, quão graves são esses erros e com que facilidade eles podem se recuperar deles?</li>
+                <li><strong>Satisfação (Satisfaction):</strong> Quão agradável é usar o design?</li>
+            </ul>
+        </div>
+                  
+        <div class="slide">
+            <div class="slide-label">Usabilidade</div>
+            <h3>Testes de Usabilidade: Identificando Problemas e Oportunidades</h3>
+            <p>O teste de usabilidade é a ferramenta prática para aplicar os conceitos acima. Ele se baseia em três elementos centrais:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Elemento</th>
+                        <th>Papel na Usabilidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Facilitador</td>
+                        <td>Orienta o participante, fornece instruções e garante dados de alta qualidade sem influenciar o comportamento.</td>
+                    </tr>
+                    <tr>
+                        <td>Tarefas</td>
+                        <td>Atividades realistas que o usuário realizaria na vida real. A redação precisa é crucial para evitar o priming (influência acidental).</td>
+                    </tr>
+                    <tr>
+                        <td>Participante</td>
+                        <td>Um usuário realista do produto (ou com perfil semelhante) que executa as tarefas e fornece feedback.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Métodos de Usabilidade</div>
+            <h3>O Método "Pensar em Voz Alta"</h3>
+            <p>Para entender a Memorização e a Aprendizagem, utilizamos a técnica de pedir que o participante narre seus pensamentos enquanto navega. Isso revela as motivações e os obstáculos mentais que métricas puras não mostram.</p>
+            </div>
+            
+        <div class="slide">
+            <h3>Heurísticas de Nielsen: O Mapa Mental de Design</h3>
+            <p>Enquanto o teste de usabilidade observa o comportamento, as heurísticas funcionam como um guia preventivo para o designer. Exemplos práticos:</p>
+            <ul>
+                <li><strong>Prevenção de Erros:</strong> Redigir tarefas claras e interfaces intuitivas para evitar que o usuário se perca.</li>
+                <li><strong>Feedback do Sistema:</strong> Como visto na montagem de um teste, o facilitador observa se o sistema responde às ações do usuário em tempo real.</li>
+            </ul>
+            <p><strong>Performance como UX: Core Web Vitals:</strong> A experiência do usuário é diretamente afetada pela performance técnica. O atraso no carregamento e a instabilidade visual impactam dois componentes de Nielsen: Eficiência (LCP) e Satisfação (CLS).</p>
+        </div>
+
+        <div class="slide">
+            <div class="section-header">
+                <div class="section-num">05</div>
+                <h2>Dinâmica Prática: "O Ciclo de Auditoria"</h2>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 1</div>
+            <h3>Atividade 1: Auditoria Cega com Lighthouse</h3>
+            <p><strong>Descrição:</strong> Para esta primeira parte, vamos focar exclusivamente na Auditoria Técnica de Acessibilidade utilizando o Google Lighthouse. O objetivo é fazer com que vocês compreendam que a acessibilidade começa no código e na estrutura semântica da página.</p>
+            <p><strong>Objetivo:</strong> Identificar barreiras críticas de acessibilidade digital e entender como algoritmos de varredura interpretam uma interface.</p>
+            <h4>1. Preparação</h4>
+            <ul>
+                <li><strong>Ferramenta:</strong> Navegador Google Chrome (Desktop).</li>
+                <li><strong>Objeto de Estudo:</strong> Escolham um site de alta complexidade (ex: um portal de notícias, uma loja virtual famosa ou o site de uma prefeitura).</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 1</div>
+            <h4>2. Execução do Diagnóstico (Passo a Passo)</h4>
+            <ol>
+                <li>Abra o site escolhido e acesse o Inspetor de Elementos (F12 ou botão direito > Inspecionar).</li>
+                <li>Vá até a aba Lighthouse.</li>
+                <li>Em "Categories", selecione "Performance" e "Accessibility".</li>
+                <li>Em "Device", escolha "Desktop" (para facilitar a visualização inicial).</li>
+                <li>Clique em "Analyze page load".</li>
+            </ol>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 1</div>
+            <h4>3. Análise dos Resultados</h4>
+            <p>Após a geração do relatório, vocês devem criar, preencher e entregar um "Checklist de Impacto" baseado nos achados:</p>
+            <ul>
+                <li><strong>A Pontuação:</strong> Qual foi a nota de 0 a 100? (Lembre-os de que o critério é binário: ou passa, ou falha).</li>
+                <li><strong>Os "Vilões" do Código:</strong> Identifique e descreva pelo menos um erro em cada uma destas categorias comuns apontadas pela ferramenta:
+                    <ul>
+                        <li><strong>Contraste:</strong> Onde o texto está difícil de ler contra o fundo?</li>
+                        <li><strong>Nomes e Rótulos:</strong> Existem botões ou links que o Lighthouse diz estarem "vazios" (sem texto interno ou aria-label)?</li>
+                        <li><strong>Atributos alt:</strong> Liste imagens que não possuem descrição alternativa.</li>
+                        <li><strong>Hierarquia:</strong> Os títulos (h1, h2, h3) estão em ordem lógica ou pulando níveis?</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 1</div>
+            <h4>4. Desafio de Reflexão: "O Falso Positivo"</h4>
+            <div class="callout yellow">
+                <p>Encontrem um elemento que o Lighthouse deu como "Pass" (Aprovado), mas que, ao olharem visualmente, parece estar errado ou confuso.</p>
+                <p><strong>Exemplo:</strong> Uma imagem que tem um alt="foto". Para o Lighthouse, o atributo existe (Pass), mas para um usuário de leitor de tela, a descrição é inútil.</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 2</div>
+            <h3>Atividade 2: O Teste de Guerrilha (Humano vs. Máquina)</h3>
+            <p><strong>Objetivo:</strong> Identificar problemas de usabilidade que o código não revela e validar as 5 metas de usabilidade de Nielsen (Aprendizado, Eficiência, Memorização, Erros e Satisfação).</p>
+            <h4>1. Preparação das Duplas</h4>
+            <ul>
+                <li><strong>O Usuário:</strong> Deve tentar realizar a tarefa como se estivesse sozinho em casa.</li>
+                <li><strong>O Observador:</strong> Não pode ajudar, não pode dar dicas e não pode explicar como o site funciona. Ele deve apenas anotar e observar.</li>
+            </ul>
+            <h4>2. A Missão (Definição da Tarefa)</h4>
+            <p>O Observador deve definir uma tarefa clara e objetiva no site analisado na Etapa 1. Exemplos:</p>
+            <ul>
+                <li>"Encontre um tênis de corrida azul, número 40, abaixo de R$ 300,00 e chegue até a tela de pagamento."</li>
+                <li>"Descubra como solicitar a segunda via do IPTU neste portal da prefeitura."</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 2</div>
+            <h4>3. Execução: O Método "Think Aloud" (Pensar em Voz Alta)</h4>
+            <p>Peça para o Usuário narrar seus pensamentos enquanto navega:</p>
+            <div class="callout blue">
+                <p><em>"Estou procurando o menu, mas esse banner está me atrapalhando..."</em></p>
+                <p><em>"Achei que esse ícone era para o carrinho, mas ele abriu o chat..."</em></p>
+                <p><em>"Onde eu clico para confirmar? O botão sumiu?"</em></p>
+            </div>
+            <h4>4. O que o Observador deve anotar (Grade de Observação)</h4>
+            <ul>
+                <li><strong>Hesitação:</strong> Onde o usuário parou por mais de 3 segundos sem saber o que fazer?</li>
+                <li><strong>Caminho em Falso:</strong> Onde o usuário clicou achando que era uma coisa, mas era outra?</li>
+                <li><strong>Frustração (Satisfação):</strong> Em que momento o usuário suspirou, reclamou ou pareceu irritado?</li>
+                <li><strong>Métrica de Erro:</strong> Quantas vezes o usuário tentou realizar uma ação e falhou (ex: clicou em um texto que não era link)?</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade 2</div>
+            <h4>5. O Confronto: Lighthouse vs. Realidade</h4>
+            <p>Após o teste (que deve durar cerca de 10 a 15 minutos), a dupla deve sentar e comparar as notas:</p>
+            <ol>
+                <li><strong>O Silêncio do Robô:</strong> Algum problema de usabilidade irritou o usuário, mas o Lighthouse deu "nota 100"? (Ex: O layout é confuso, mas o código está tecnicamente correto).</li>
+                <li><strong>O Peso do Core Web Vitals:</strong> O Lighthouse acusou um LCP (carregamento) baixo. O usuário percebeu isso? Ele comentou que o site estava "lento" ou "travado"?</li>
+                <li><strong>Acessibilidade Vivida:</strong> Se o Lighthouse apontou falta de contraste, o usuário teve dificuldade real de ler alguma informação?</li>
+            </ol>
+            <h4>6. Conclusão da Etapa</h4>
+            <p>Cada dupla deve resumir sua experiência em uma frase:</p>
+            <p><em>"O Lighthouse disse que o site era [Nota], mas nosso usuário [conseguiu/não conseguiu] completar a tarefa porque [motivo de usabilidade]."</em></p>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Etapa 3</div>
+            <h3>Etapa 3: Remediação</h3>
+            <p>Vocês devem propor correções para os problemas encontrados:</p>
+            <ol>
+                <li>Corrigir um erro de contraste.</li>
+                <li>Adicionar um aria-label.</li>
+                <li>Redesenhar um fluxo que causou confusão no teste de guerrilha.</li>
+            </ol>
+            <p>Para fechar o ciclo da atividade, a Etapa 3: Relatório de Diagnóstico e Plano de Remediação servirá como o documento final que consolida a visão técnica e a visão humana sobre o produto analisado.</p>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade Final</div>
+            <h3>Atividade Final: O Plano de Remediação</h3>
+            <p><strong>Objetivo:</strong> Consolidar os dados das etapas anteriores (Lighthouse + Teste de Guerrilha) e propor soluções práticas baseadas nos pilares de performance, acessibilidade e usabilidade.</p>
+            <h4>1. Estrutura do Documento de Entrega</h4>
+            <p>A dupla deve entregar um relatório em formato de PDF contendo os seguintes tópicos:</p>
+            <p><strong>A. O Cenário Atual (Raio-X)</strong></p>
+            <ul>
+                <li>Screenshot do Lighthouse: Exibir a nota de Acessibilidade e as métricas de Core Web Vitals (LCP e CLS).</li>
+                <li>A "Dor" do Usuário: Descrição breve da maior dificuldade encontrada pelo parceiro durante o teste de guerrilha.</li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade Final</div>
+            <p><strong>B. Tabela de Achados e Soluções (O Coração do Trabalho)</strong></p>
+            <p>Vocês devem preencher uma tabela comparativa com pelo menos 3 problemas críticos.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problema Identificado</th>
+                        <th>Origem (Lighthouse ou Usuário?)</th>
+                        <th>Impacto (Baixo, Médio ou Crítico)</th>
+                        <th>Proposta de Solução (Remediação)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ex: Botão sem nome</td>
+                        <td>Lighthouse</td>
+                        <td>Crítico</td>
+                        <td>Inserir atributo aria-label no HTML.</td>
+                    </tr>
+                    <tr>
+                        <td>Ex: Menu confuso</td>
+                        <td>Usuário</td>
+                        <td>Médio</td>
+                        <td>Reorganizar categorias por ordem alfabética.</td>
+                    </tr>
+                    <tr>
+                        <td>Ex: Layout "pulando"</td>
+                        <td>Lighthouse (CLS)</td>
+                        <td>Baixo</td>
+                        <td>Definir largura e altura fixa para as imagens.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Atividade Final</div>
+            <p><strong>C. Justificativa Baseada em Nielsen</strong></p>
+            <p>Escolha um dos problemas de usabilidade detectados e explique qual das 10 Heurísticas de Nielsen ou qual dos 5 componentes de usabilidade ele fere.</p>
+            <p><em>Exemplo: "A falha na busca fere a Eficiência, pois o usuário precisou de 10 cliques para algo que deveria ser feito em 2."</em></p>
+            <hr>
+            <h4>2. Conclusão Crítica: "A Ponte"</h4>
+            <div class="callout red">
+                <p>A dupla deve responder, em um parágrafo, à seguinte questão:</p>
+                <p><strong>"Se corrigíssemos apenas o que o Lighthouse (robô) apontou, a experiência do nosso usuário seria 100% satisfatória? Porquê?"</strong></p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-label">Avaliação</div>
+            <h4>3. Critérios de Avaliação</h4>
+            <ul>
+                <li><strong>Consistência:</strong> Os problemas citados na entrega final condizem com o que foi observado nas etapas anteriores?</li>
+                <li><strong>Qualidade Técnica:</strong> A solução proposta para o erro do Lighthouse faz sentido técnico (ex: citar atributos alt, labels, contraste)?</li>
+                <li><strong>Empatia de Design:</strong> O aluno conseguiu identificar a frustração do colega e traduzir isso em uma melhoria de interface?</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+        <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+        <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const currentIndicator = document.getElementById('current');
+        const totalIndicator = document.getElementById('total');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        totalIndicator.textContent = totalSlides;
+
+        function updateView() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlideIndex) {
+                    slide.classList.add('active');
+                }
+            });
+            currentIndicator.textContent = currentSlideIndex + 1;
+            
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                updateView();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                updateView();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+        });
+    </script>
+</body>
+</html>
