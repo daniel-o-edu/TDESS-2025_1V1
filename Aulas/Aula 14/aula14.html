@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 14 - Teste de Integração</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 14</div>
+ <h1>Aula 14 - Teste de Integração</h1>
+ <p><strong>Descrição:</strong> Analisando os testes de integração em PHP utilizando o PHPUnit exige compreendermos que, diferentemente dos testes unitários que testam classes ou métodos isolados, os testes de integração garantem que diferentes partes do seu sistema ou serviços externos funcionem perfeitamente em conjunto.</p>
+ <p>Nesta aula vamos estruturar, executar e aplicar boas práticas para testes envolvendo Bancos de Dados e APIs Externas (como o ViaCEP).</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>1. Testes de Integração com Banco de Dados</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>1. Testes de Integração com Banco de Dados</h2>
+ <p>Testar a integração com o banco de dados significa verificar se as suas queries, models ou repositórios estão gravando, lendo, atualizando e deletando os dados corretamente na base real.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Desafios dos Testes de Banco de Dados</h2>
+ <ul>
+ <li><strong>Estado dos Dados:</strong> Um teste não pode interferir no outro. Se o Teste A insere um usuário, o Teste B não deve falhar por encontrar um usuário inesperado.</li>
+ <li><strong>Lentidão:</strong> Testes de banco são naturalmente mais lentos que testes unitários devido ao I/O de disco e rede.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Soluções e Boas Práticas</h2>
+ <ul>
+ <li><strong>1. Banco de Dados Exclusivo para Testes:</strong> Nunca rode testes no banco de produção ou desenvolvimento local.</li>
+ <li>Crie um banco específico (ex: meu_projeto_testing). O uso de SQLite em memória (:memory:) é muito comum para acelerar a execução, embora usar o mesmo motor de produção (MySQL/PostgreSQL) via Docker garanta maior fidelidade.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Soluções e Boas Práticas (Continuação)</h2>
+ <ul>
+ <li><strong>2. Transactions (Transações):</strong> A melhor forma de manter o banco limpo é iniciar uma transação no método setUp() do PHPUnit e fazer um rollBack() no método tearDown(). Assim, nada é de fato persistido no disco ao final do teste.</li>
+ <li><strong>3. Seeders e Factories:</strong> Utilize geradores de dados para popular o banco com o estado necessário antes da asserção (ex.: generatedata.com).</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Exemplo de Estado de Dados</h2>
+ <p>Como destacamos, o maior desafio aqui é o estado dos dados (garantir que um teste não incorra em interferência no outro).</p>
+ <p>A solução ideal é usar Transactions (Transações), iniciando a transação no setUp() e desfazendo tudo com rollBack() no tearDown().</p>
+ </div>
+
+ <div class="slide">
+ <h2>O Código (UserRepositoryTest.php)</h2>
+ <pre><code>&lt;?php
+
+use PHPUnit\Framework\TestCase;
+
+class UserRepositoryTest extends TestCase
+{
+    private PDO $db;
+    private UserRepository $repository;
+
+    // Executado ANTES de cada teste
+    protected function setUp(): void
+    {
+        // Conecta em um banco exclusivo de testes (ex: SQLite em memória para rapidez)
+        $this-&gt;db = new PDO('sqlite::memory:');
+        $this-&gt;db-&gt;exec("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)");
+        
+        // Inicia a transação para que nada seja salvo definitivamente no disco
+        $this-&gt;db-&gt;beginTransaction();
+        $this-&gt;repository = new UserRepository($this-&gt;db);
+    }
+
+    // O teste em si
+    public function test_deve_salvar_um_usuario_no_banco_de_dados(): void
+    {
+        // 1. Dados de teste (simulando um Factory/Seeder)
+        $userData = ['name' => 'João Silva', 'email' => 'joao@email.com'];
+        
+        // 2. Executa a ação
+        $this-&gt;repository-&gt;save($userData);
+        
+        // 3. Asserção: Verifica se o dado realmente foi gravado corretamente
+        $savedUser = $this-&gt;repository-&gt;findByEmail('joao@email.com');
+        $this-&gt;assertNotNull($savedUser);
+        $this-&gt;assertEquals('João Silva', $savedUser['name']);
+    }
+
+    // Executado DEPOIS de cada teste
+    protected function tearDown(): void
+    {
+        // Desfaz tudo o que foi feito no teste, deixando o banco limpo para o próximo
+        $this-&gt;db-&gt;rollBack();
+    }
+}
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>Explicação do Ciclo de Banco</h2>
+ <ul>
+ <li><strong>setUp():</strong> Antes de o teste rodar, nós preparamos o ambiente. Criamos a tabela e abrimos uma transação (beginTransaction). É como se abríssemos um rascunho de alterações no banco.</li>
+ <li><strong>O Teste:</strong> Inserimos o "João Silva" e perguntamos para o banco se ele realmente está lá. Se o banco responder que sim, o teste passa.</li>
+ <li><strong>tearDown():</strong> Assim que o teste termina, o rollBack() entra em ação. Ele "deleta" o rascunho. Dessa forma, se houver um "Teste B", o banco estará totalmente limpo e o João Silva não estará lá para atrapalhar.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>2. Testes de Integração com APIs Externas (Ex: ViaCEP)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>2. Testes de Integração com APIs Externas (Ex: ViaCEP)</h2>
+ <p>Quando seu sistema depende de uma API externa como o ViaCEP (para buscar endereços a partir do CEP), você enfrenta um dilema: se você fizer requisições reais para a API durante os testes, sua suíte ficará lenta, sujeita a falhas de rede e pode ser bloqueada por Rate Limiting (limite de requisições).</p>
+ </div>
+
+ <div class="slide">
+ <h2>A Abordagem Correta: Mocking do Cliente HTTP</h2>
+ <p>Em vez de bater na API real do ViaCEP a cada execução, nós "mockamos" (simulamos) as respostas HTTP. Isso garante que o seu código que processa a resposta seja testado, sem depender da internet.</p>
+ <p>Se você estiver usando o Guzzle (o cliente HTTP mais popular no PHP), ele possui uma ferramenta nativa excelente para isso: o MockHandler.</p>
+ <p><strong>Nota sobre Contratos:</strong> Para garantir que a API real não mudou seu formato de resposta sem você saber (quebrando seu mock), é recomendável criar testes de Contrato (ou testes End-to-End agendados) que rodam periodicamente contra a API real, mas separá-los da suíte de testes principal executada no seu CI/CD diário.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Exemplo de Abordagem para API</h2>
+ <p>Bater na API real do ViaCEP a cada teste gera lentidão e falhas de rede.</p>
+ <p>A abordagem correta é usar o MockHandler do Guzzle para fingir que fomos até a internet, testando apenas como o nosso código processa essa resposta.</p>
+ </div>
+
+ <div class="slide">
+ <h2>O Código (ViaCepServiceTest.php)</h2>
+ <pre><code>&lt;?php
+
+use PHPUnit\Framework\TestCase;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+
+class ViaCepServiceTest extends TestCase
+{
+    public function test_deve_retornar_o_endereco_correto_ao_buscar_por_cep(): void
+    {
+        // 1. Criamos a resposta "falsa" que simula o formato real do ViaCEP
+        $mockResponseBody = json_encode([
+            "cep" => "01001-000",
+            "logradouro" => "Praça da Sé",
+            "bairro" => "Sé",
+            "localidade" => "São Paulo",
+            "uf" => "SP"
+        ]);
+
+        // 2. Injetamos essa resposta no MockHandler do Guzzle
+        $mockHandler = new MockHandler([
+            new Response(200, [], $mockResponseBody)
+        ]);
+
+        $handlerStack = HandlerStack::create($mockHandler);
+        $client = new Client(['handler' => $handlerStack]);
+
+        // 3. Passamos o cliente "mockado" para o nosso serviço
+        $viaCepService = new ViaCepService($client);
+        $endereco = $viaCepService->buscar('01001000');
+
+        // 4. Asserção: Garantimos que o nosso código processou o JSON corretamente
+        $this-&gt;assertEquals('Praça da Sé', $endereco->getLogradouro());
+        $this-&gt;assertEquals('São Paulo', $endereco->getCidade());
+    }
+}
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>Explicação do Mock de API</h2>
+ <ul>
+ <li><strong>O Mock (MockHandler):</strong> Nós criamos um JSON idêntico ao que o ViaCEP nos devolveria se estivéssemos conectados à internet.</li>
+ <li><strong>O Truque:</strong> Configuramos o cliente HTTP (Guzzle) para que, em vez de disparar uma requisição para a web, ele simplesmente pegue essa resposta falsa que deixamos programada.</li>
+ <li><strong>O Objetivo:</strong> O objetivo aqui não é testar se o site do ViaCEP está no ar, mas sim testar se o nosso código sabe ler o JSON e transformá-lo em um objeto de endereço válido no nosso sistema. Isso deixa a suíte de testes extremamente veloz e imune a quedas de internet.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>Conclusão: O Papel Estratégico dos Testes de Integração</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Conclusão: O Papel Estratégico dos Testes de Integração</h2>
+ <p>Os testes de integração funcionam como a engrenagem que garante a confiabilidade do ecossistema de um software.</p>
+ <p>Enquanto os testes unitários validam a lógica isolada de funções e métodos de forma cirúrgica, os testes de integração sobem um degrau na arquitetura para validar a comunicação real entre componentes internos e serviços externos. Eles respondem à pergunta crucial: "Nosso código funciona bem quando entra em contato com o mundo exterior?"</p>
+ <p>Fica claro que realizar testes de integração exige um equilíbrio inteligente entre fidelidade e isolamento, dividindo as estratégias em duas frentes principais:</p>
+ </div>
+
+ <div class="slide">
+ <h2>1. O Equilíbrio no Armazenamento (Banco de Dados)</h2>
+ <p>Para componentes locais persistentes, como bancos de dados, a fidelidade é indispensável para garantir que as queries, modelos e repositórios operem corretamente.</p>
+ <p>No entanto, para mitigar os problemas de lentidão e o risco de um teste interferir no resultado do outro (estado dos dados), o uso de ambientes isolados como SQLite em memória ou ambientes isolados via Docker combinado com o controle rigoroso de transações (beginTransaction e rollBack), prova-se a melhor abordagem técnica.</p>
+ <p>Isso permite que os testes sejam rápidos, confiáveis e que o banco termine exatamente como começou: limpo.</p>
+ </div>
+
+ <div class="slide">
+ <h2>2. O Isolamento de Dependências Instáveis (APIs Externas)</h2>
+ <p>Quando o sistema depende de terceiros (como a API do ViaCEP), a abordagem muda drasticamente. Fazer requisições reais para a internet sabota a estabilidade dos testes devido a falhas de rede, lentidão e bloqueios por limites de requisição (rate limiting).</p>
+ <p>A conclusão técnica ideal é o Mocking do Cliente HTTP (utilizando ferramentas como o MockHandler do Guzzle).</p>
+ <p>Essa estratégia simula as respostas da API na memória e foca o teste no que realmente importa: a capacidade do seu sistema de processar e interpretar esses dados corretamente. Para garantir que a estrutura da API externa não mudou à revelia, utilizam-se testes de contrato isolados da suíte principal.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Resumo Final</h2>
+ <p>Os testes de integração bem estruturados removem o medo de implantar alterações em produção.</p>
+ <p>Ao dominar o uso de bancos de dados temporários e a simulação inteligente de APIs, o desenvolvedor cria uma esteira de automação (CI/CD) resiliente, veloz e imune a fatores externos, assegurando a integridade e a continuidade do software a longo prazo.</p>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
