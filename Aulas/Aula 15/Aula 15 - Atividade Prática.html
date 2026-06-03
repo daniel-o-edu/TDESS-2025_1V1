@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Atividade Prática: Caça aos Bugs com PHPUnit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 9pt;
+                color: #64748b;
+            }
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #334155;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            font-size: 10.5pt;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 20pt;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 12pt;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        h2 {
+            color: #1e293b;
+            font-size: 14pt;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #0f172a;
+            font-size: 11.5pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .alert-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+            page-break-inside: avoid;
+        }
+
+        .alert-box p {
+            margin: 0;
+            color: #14532d;
+        }
+
+        .dica-box {
+            background-color: #fefce8;
+            border: 1px solid #fef08a;
+            border-left: 4px solid #ca8a04;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+
+        .dica-box h4 {
+            margin: 0 0 5px 0;
+            color: #854d0e;
+            font-size: 10.5pt;
+            text-transform: uppercase;
+        }
+
+        .dica-box p {
+            margin: 0;
+            color: #713f12;
+            font-size: 10pt;
+        }
+
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 12px;
+            overflow-x: auto;
+            margin-top: 0;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 9.5pt;
+            color: #0f172a;
+        }
+
+        .badge {
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8.5pt;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        
+        .badge-unit { background-color: #dbeafe; color: #1e40af; }
+        .badge-int { background-color: #fae8ff; color: #86198f; }
+    </style>
+</head>
+<body>
+
+    <h1>Aula 14 - Atividade Prática</h1>
+    <div class="subtitle">Laboratório de Testes com PHPUnit: Chão de Fábrica e OEE</div>
+
+    <h2>1. Objetivos da Atividade</h2>
+    <p>
+        Esta atividade prática visa consolidar os conceitos de <strong>Testes Unitários</strong> e <strong>Testes de Integração</strong> utilizando o framework PHPUnit. Você atuará como um desenvolvedor encarregado de identificar e expor falhas ocultas no motor de regras de um painel de monitoramento de produção (Dashboard OEE) voltado para extrusoras e injetoras.
+    </p>
+    <p>Ao final deste laboratório, você deverá ser capaz de:</p>
+    <ul>
+        <li>Configurar e arquitetar de forma autônoma o ambiente do PHPUnit.</li>
+        <li>Escrever asserções unitárias para validar tratamento de exceções e limites de valores (Boundary Testing) em indicadores industriais.</li>
+        <li>Desenvolver testes de integração que validam a persistência correta de múltiplos registros contínuos.</li>
+    </ul>
+
+    <div class="alert-box">
+        <p><strong>Atenção:</strong> Todo o ecossistema de comandos deste documento foi desenhado para execução no terminal do Windows (PowerShell ou CMD). Certifique-se de utilizar as barras invertidas (<code>\</code>) corretas ao referenciar executáveis locais.</p>
+    </div>
+
+    <h2>2. Preparação do Ambiente</h2>
+    <p>Siga os passos abaixo para estruturar o projeto:</p>
+    <ol>
+        <li>Abra o terminal na pasta de sua preferência e crie o diretório do projeto:
+            <pre><code>mkdir painel-oee-tests&#10;cd painel-oee-tests</code></pre>
+        </li>
+        <li>Inicialize o Composer e adicione o PHPUnit:
+            <pre><code>composer require --dev phpunit/phpunit</code></pre>
+        </li>
+        <li>Crie a estrutura de diretórios:
+            <pre><code>mkdir src&#10;mkdir tests</code></pre>
+        </li>
+        <li>Configure o autoloading padrão <strong>PSR-4</strong> no <code>composer.json</code> mapeando <code>App\\</code> para <code>src/</code>, e execute <code>composer dump-autoload</code>.</li>
+        <li>Crie o arquivo <code>phpunit.xml</code> na raiz para habilitar cores e apontar para a pasta <code>tests</code>.</li>
+    </ol>
+
+    <h2>3. O Código Fonte sob Suspeita</h2>
+    <p>Crie o arquivo <code>MonitorProducao.php</code> dentro de <code>src/</code> e cole o código abaixo. Esta classe possui <strong>três bugs críticos</strong> relacionados à lógica de telemetria.</p>
+
+    <pre><code>&lt;?php
+
+namespace App;
+
+class MonitorProducao
+{
+    private string $caminhoLog = 'telemetria_maquinas.jsonl';
+
+    public function calcularDisponibilidade(int $tempoPlanejado, int $tempoParada): float
+    {
+        // Regra de Negócio: A disponibilidade é a razão percentual entre o tempo produtivo e o tempo planejado.
+        // O tempo produtivo é o tempo planejado subtraído do tempo de parada.
+        $tempoProdutivo = $tempoPlanejado - $tempoParada;
+        
+        return ($tempoProdutivo / $tempoPlanejado) * 100;
+    }
+
+    public function verificarTemperatura(float $temperaturaAtual): string
+    {
+        // Regra de Negócio: Por motivos de segurança, extrusoras operando a partir de 180°C
+        // devem acionar o status 'ALERTA_CRITICO'. Caso contrário, 'OPERACAO_NORMAL'.
+        if ($temperaturaAtual > 180.0) {
+            return 'ALERTA_CRITICO';
+        }
+
+        return 'OPERACAO_NORMAL';
+    }
+
+    public function registrarLeitura(string $codigoMaquina, array $dados): bool
+    {
+        $leitura = [
+            'maquina' => $codigoMaquina,
+            'dados' => $dados,
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        $json = json_encode($leitura) . PHP_EOL;
+
+        // Persiste a leitura em um arquivo de log para auditoria futura
+        return file_put_contents($this->caminhoLog, $json) !== false;
+    }
+
+    public function lerHistoricoTotal(): array
+    {
+        if (!file_exists($this->caminhoLog)) {
+            return [];
+        }
+        
+        $linhas = file($this->caminhoLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $historico = [];
+        
+        foreach ($linhas as $linha) {
+            $historico[] = json_decode($linha, true);
+        }
+        
+        return $historico;
+    }
+
+    public function setCaminhoLog(string $caminho): void
+    {
+        $this->caminhoLog = $caminho;
+    }
+}</code></pre>
+
+    <h2>4. Enunciado da Atividade e Pistas Textuais</h2>
+    <p>
+        <strong>Sua Missão:</strong> Crie um arquivo <code>MonitorProducaoTest.php</code> na pasta <code>tests/</code> e escreva cenários para provar a existência das falhas listadas abaixo. Não corrija a classe até que os testes apontem os erros.
+    </p>
+
+    <div class="dica-box">
+        <h4>Pista 1: O Colapso do Turno Inativo <span class="badge badge-unit">Unidade</span></h4>
+        <p>O encarregado de turno reportou que o cálculo de OEE quebrou completamente com um <em>Fatal Error</em>. Isso ocorreu quando o sistema tentou processar a métrica de uma máquina reserva que esteve inativa e, portanto, teve exatamente 0 minutos de <code>$tempoPlanejado</code>.</p> <br>
+        <p><b>Escreva um teste unitário que valide o comportamento do sistema quando o tempo planejado for 0 (deve retornar 0.0 em vez de estourar erro de divisão).</b></p>
+    </div>
+
+    <div class="dica-box">
+        <h4>Pista 2: A Extrusora Fervente <span class="badge badge-unit">Unidade</span></h4>
+        <p>Um operador de segurança notou uma falha perigosa no painel: a temperatura de uma extrusora cravou exatamente em 180°C, mas o sistema indicou "OPERACAO_NORMAL", quando o manual de segurança exige alerta "A partir de 180°C".</p><br>
+        <p><b>Monte um teste de limite (Boundary Test) passando exatamente o valor 180.0 para verificar o erro no operador relacional.</b></p>
+    </div>
+
+    <div class="dica-box">
+        <h4>Pista 3: A Amnésia do Log de Sensores <span class="badge badge-int">Integração</span></h4>
+        <p>A equipe de dados está furiosa. Ao analisar o arquivo <code>telemetria_maquinas.jsonl</code> no final do dia, perceberam que ele sempre contém apenas o registro da <em>última</em> máquina auditada. Todos os milhares de registros anteriores foram apagados.</p><br>
+        <p><b>Crie um teste simulando a gravação de telemetria de duas máquinas diferentes (ex: INJ-01 e EXT-02) em sequência e afirme que <code>lerHistoricoTotal()</code> possui tamanho (count) igual a 2.</b></p>
+    </div>
+
+    <h2>5. Entregas Esperadas</h2>
+    <p>Para a conclusão desta atividade, você deverá apresentar:</p>
+    <ol>
+        <li>O arquivo <code>MonitorProducaoTest.php</code> configurado com os 3 testes falhando.</li>
+        <li>O código original <code>MonitorProducao.php</code> corrigido.</li>
+        <li>O print do terminal exibindo a execução do PHPUnit com 100% de sucesso.</li>
+    </ol>
+</body>
+</html>
